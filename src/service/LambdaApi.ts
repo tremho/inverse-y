@@ -312,6 +312,7 @@ export class LambdaApi<TEvent> {
      */
     setDefinition(def:ServiceDefinition) {
         this.definition = def
+        this.validateEventDefinition();
     }
 
     /**
@@ -320,7 +321,29 @@ export class LambdaApi<TEvent> {
      */
     setHandler(handler:Handler) {
         this.handler = handler
-}
+    }
+
+    validateEventDefinition() {
+        let buildEvent:any = {}
+
+        function emptyDefault(type:string):any {
+            switch(type) {
+                case 'string': return "";
+                case 'number': return 0;
+                case 'boolean': return false;
+                case 'null': return null;
+                case 'undefined': return undefined;
+                case 'object': return {};
+            }
+        }
+
+        const parameters = this.definition.parameters
+        for(let p of parameters) {
+            buildEvent[p.name] = p.default ?? emptyDefault(p.type)
+        }
+        let t:TEvent = buildEvent;
+        return (t == buildEvent);
+    }
 
     /**
      * Validates the incoming request of a service call
