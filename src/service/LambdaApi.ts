@@ -346,15 +346,15 @@ export class LambdaApi<TEvent> {
     }
 
     /**
-     * Validates the incoming request of a service call
-     * @param req The Express Request object
+     * Validates the incoming event of a service call against parameter definitions
+     * @param event - the incoming event
      */
-    validate(req:any):ParamSet|string {
+    validate(event:TEvent):ParamSet|string {
         const pset = new ParamSet()
         const parameters = this.definition.parameters
         let message = ''
         for(let p of parameters) {
-            let v = req.query[p.name]  // TODO: Expand to be aware of post parameters in different formats also
+            let v = (event as any)[p.name]  // TODO: Expand to be aware of post parameters in different formats also
             let vresp = p.validate(v)
             if(vresp) {
                 if(message) message += '\n'
@@ -374,6 +374,10 @@ export class LambdaApi<TEvent> {
         if((event as RequestEvent).version) {
             // assume this is a request. our event payload is in the body
             event = (event as RequestEvent).body;
+        }
+        const v = this.validate((event as TEvent))
+        if (typeof v === 'string') {
+            return {statusCode: 500, result: "Parameter validation fails: "+v}
         }
         if(this.handler) {
             return this.returnResult(this.handler(event))
