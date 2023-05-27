@@ -8,6 +8,7 @@ import {
 }
  from './service/LambdaApi'
 
+// export all from LambdaApi
 export {LambdaApi as LambdaApi}
 export {Handler as Handler}
 export {ParamDef as ParamDef}
