@@ -377,7 +377,7 @@ export class LambdaApi<TEvent> {
         }
         const v = this.validate((event as TEvent))
         if (typeof v === 'string') {
-            return {statusCode: 500, result: "Parameter validation fails: "+v}
+            return this.returnResult({statusCode: 500, result: "Parameter validation fails: "+v})
         }
         if(this.handler) {
             return this.returnResult(this.handler(event))
