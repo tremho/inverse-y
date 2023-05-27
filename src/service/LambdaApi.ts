@@ -361,10 +361,7 @@ export class LambdaApi<TEvent> {
     {
         return  {
             statusCode: resp.statusCode ?? 200,
-            body: JSON.stringify({
-                // event,
-                data: resp.result,
-            }),
+            data: resp.result,
         };
 
     }
