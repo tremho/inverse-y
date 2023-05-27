@@ -380,6 +380,8 @@ export class LambdaApi<TEvent> {
             return this.returnResult({statusCode: 500, result: "Parameter validation fails: "+v})
         }
         if(this.handler) {
+            var result = this.handler(event);
+            this.definition.returns.validate(result);
             return this.returnResult(this.handler(event))
         }
     }
