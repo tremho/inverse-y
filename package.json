@@ -1,0 +1,31 @@
+{
+  "name": "@tremho/inverse-y",
+  "version": "1.0.1-pre-release.2",
+  "description": "",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "prepublish": "npm run build",
+    "clean": "rm -fr build node_modules && npm install",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "scaffolding",
+    "framework",
+    "services"
+  ],
+  "author": "tremho",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "@types/tap": "^15.0.8",
+    "tap": "^16.3.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.341.0",
+    "@aws-sdk/client-s3": "^3.341.0"
+  }
+}
