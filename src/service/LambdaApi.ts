@@ -139,6 +139,7 @@ export class ReturnDef {
         this.description = description || ''
         this.props = props
     }
+
     validate(value:any) {
         let vt:string = typeof value
         if(vt === 'object') {
@@ -380,9 +381,12 @@ export class LambdaApi<TEvent> {
             return this.returnResult({statusCode: 500, result: "Parameter validation fails: "+v})
         }
         if(this.handler) {
-            var result = this.handler(event);
-            this.definition.returns.validate(result);
-            return this.returnResult(this.handler(event))
+            var resultObj = this.handler(event);
+            if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
+                this.definition.returns.validate(resultObj.result);
+            }
+            return this.returnResult (resultObj);
+
         }
     }
 
