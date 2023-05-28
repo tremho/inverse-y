@@ -141,8 +141,11 @@ export class ReturnDef {
     }
 
     validate(value:any) {
+        let trace = ''
         let vt:string = typeof value
+        trace = 'value in = '+vt;
         if(vt === 'object') {
+            trace = 'vt is object'
             if(Array.isArray(value)) {
                 vt = typeof value[0]
                 if(vt === 'undefined') vt = ''
@@ -153,6 +156,7 @@ export class ReturnDef {
         const types = this.type.split('|')
         for(let t of types) {
             t = t.trim()
+            trace += t+', '
             if(t === 'file' || t === 'text') t = 'string' // value is path
             if(t === 'js') {
                 t = 'object'
@@ -167,7 +171,7 @@ export class ReturnDef {
             }
         }
         if(!typeOk) {
-            throw Error(`Return type ${types} expected, ${vt} found`)
+            throw Error(`Return type ${types} expected, ${vt} found (${trace})`)
         }
         if(vt === 'object' && this.props.length) {
             for(let p of this.props) {
