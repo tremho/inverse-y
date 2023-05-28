@@ -156,7 +156,6 @@ export class ReturnDef {
         const types = this.type.split('|')
         for(let t of types) {
             t = t.trim()
-            trace += t+', '
             if(t === 'file' || t === 'text') t = 'string' // value is path
             if(t === 'js') {
                 t = 'object'
