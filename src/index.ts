@@ -4,6 +4,7 @@ import {
     ParamDef,
     ParamSet,
     ReturnDef,
+    RequestEvent,
     ServiceDefinition
 }
  from './service/LambdaApi'

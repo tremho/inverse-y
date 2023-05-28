@@ -1,5 +1,6 @@
 import {Method} from "./ServiceAPI";
 import {RequestEvent} from "../request/EventTypes";
+export {RequestEvent as RequestEvent}
 
 /**
  * Defines the declaration of a parameter
