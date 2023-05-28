@@ -143,7 +143,7 @@ export class ReturnDef {
     validate(value:any) {
         let trace = ''
         let vt:string = typeof value
-        trace = 'value in = '+vt;
+        trace = 'value in = '+value;
         if(vt === 'object') {
             trace = 'vt is object'
             if(Array.isArray(value)) {
