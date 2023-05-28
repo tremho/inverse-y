@@ -286,8 +286,9 @@ export class ServiceDefinition {
     description: string = ''
     parameters: ParamDef[] = []
     returns: ReturnDef = new ReturnDef()
-    sessionRequired:boolean = true
+    sessionRequired: boolean = true
     userRequired: boolean = false
+    onRequest?: (request: RequestEvent) => void
 }
 
 /** Declares the callback format for handling service API business */
@@ -376,6 +377,9 @@ export class LambdaApi<TEvent> {
 
     entryPoint(event: TEvent|RequestEvent) {
         if((event as RequestEvent).version) {
+            if(typeof this.definition.onRequest === 'function') {
+                this.definition.onRequest(event as RequestEvent);
+            }
             // assume this is a request. our event payload is in the body
             event = (event as RequestEvent).body;
         }
