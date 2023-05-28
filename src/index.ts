@@ -15,5 +15,6 @@ export {Handler as Handler}
 export {ParamDef as ParamDef}
 export {ParamSet as ParamSet}
 export {ReturnDef as ReturnDef}
+export {RequestEvent as RequestEvent}
 export {ServiceDefinition as ServiceDefinition}
 
