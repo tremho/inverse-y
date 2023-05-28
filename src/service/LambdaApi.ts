@@ -64,7 +64,7 @@ export class ParamDef {
             }
         }
         if(!typeOk) {
-            return `Expected parameter "${this.name}" type to be ${this.type}, got ${vt}`
+            throw Error(`Expected parameter "${this.name}" type to be ${this.type}, got ${vt}`)
         }
         if(vt === 'number') {
             if(this.min !== undefined) {
@@ -87,7 +87,7 @@ export class ParamDef {
                 }
             }
             if(!found) {
-                return `Parameter "${this.name}" value "${value}" is not one of ${this.oneOf}`
+                throw Error(`Parameter "${this.name}" value "${value}" is not one of ${this.oneOf}`)
             }
         }
         if(vt === 'string') {
@@ -95,7 +95,7 @@ export class ParamDef {
                 const str:string = value
                 const regx = new RegExp(this.match)
                 if(!str.match(regx)) {
-                    return `Parameter "${this.name}" value string "${value}" does not match pattern "${this.match}"`
+                    throw Error(`Parameter "${this.name}" value string "${value}" does not match pattern "${this.match}"`)
                 }
             }
         }
