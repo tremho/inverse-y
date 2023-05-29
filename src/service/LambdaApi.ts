@@ -1,6 +1,6 @@
-import {Method} from "./ServiceAPI";
 import {RequestEvent} from "../request/EventTypes";
 export {RequestEvent as RequestEvent}
+
 
 /**
  * Defines the declaration of a parameter
@@ -279,12 +279,31 @@ export class ParamSet {
     }
 }
 
+enum LogLevel {
+    None
+}
+
+/** Types of methods **/
+export enum Method {
+    'HEAD'= 'HEAD',
+    'OPTIONS' = 'OPTIONS',
+    'GET' = 'GET',
+    'POST' = 'POST',
+    'PATCH' = 'PATCH',
+    'PUT' = 'PUT',
+    'DELETE' = 'DELETE'
+}
+
 /**
  * The definition of the service
  */
 export class ServiceDefinition {
     name: string = ''
+    version? :string
     description: string = ''
+    uri: string = ''
+    allowedMethods: string = ''
+    logLevel: LogLevel = LogLevel.None
     parameters: ParamDef[] = []
     returns: ReturnDef = new ReturnDef()
     sessionRequired: boolean = true

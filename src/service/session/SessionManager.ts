@@ -11,7 +11,7 @@ and the enterSessionApi and leaveSessionApi functions (to be called for each ses
  */
 
 
-import {logger as Log} from '../Logger'
+import {Log} from "../../Logging/Logger"
 let crypto:any
 try {
     crypto = require('crypto');
@@ -64,7 +64,7 @@ export class SessionSpace {
 function newSession(fromApi:string, appId?:string) {
     let count = Object.getOwnPropertyNames(sessionSet).length
     if (count >= maxSessions) {
-        Log.info(`[clean] initiating cleanSessions at ${count} sessions retained`)
+        Log.Info(`[clean] initiating cleanSessions at ${count} sessions retained`)
         cleanSessions()
     }
     const sessionId:string = makeNewSessionId()
@@ -74,7 +74,7 @@ function newSession(fromApi:string, appId?:string) {
     sessionSpace.firstApi = sessionSpace.lastApi = fromApi
     sessionSpace.appId = appId
 
-    Log.info('[session] created session ' + sessionId)
+    Log.Info('[session] created session ' + sessionId)
 
     return sessionSpace
 }
@@ -92,7 +92,7 @@ function removeMostIdleSession() {
         }
     })
     if(mostIdleId) {
-        Log.info(`[clean] removing session ${mostIdleId}, idle for ${mostIdleTime} ms`)
+        Log.Info(`[clean] removing session ${mostIdleId}, idle for ${mostIdleTime} ms`)
         delete sessionSet[mostIdleId]
     }
 }
@@ -167,7 +167,7 @@ export function enterSessionApi(req:any) {
         n = apiName.lastIndexOf('/')
         apiName = apiName.substring(n)
         if (!appId) {
-            Log.warn('no appId passed entering session Api ' + apiName)
+            Log.Warn('no appId passed entering session Api ' + apiName)
         }
         let session = getSession(sessionId)
         if (!session) {
@@ -180,7 +180,7 @@ export function enterSessionApi(req:any) {
         sessionSet[session.sessionId] = session
         return session.sessionId
     } catch(e) {
-        Log.exception(e)
+        Log.Exception(e)
     }
 }
 
@@ -199,7 +199,7 @@ export function leaveSessionApi(res:any, ssnParam?:string | SessionSpace) {
             newId = updateSessionId(ssnParam)
             res.header(NEXT_SESSION_ID, newId)
         } catch (e) {
-            Log.exception(e)
+            Log.Exception(e)
         }
     }
     return newId

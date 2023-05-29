@@ -1,14 +1,14 @@
 
-import {logger as Log} from '../Logger'
+import {Log} from "../../Logging/Logger"
 import {S3Client,
     HeadBucketCommand,CreateBucketCommand,
     GetObjectCommand,PutObjectCommand
-} from '@aws-sdk/client-s3'
-import {fromIni} from "@aws-sdk/credential-provider-ini"
-const awsCred = fromIni({profile:'tremho'})
-const s3Client = new S3Client({
-    credentials: awsCred
-})
+} from "@aws-sdk/client-s3"
+
+const REGION = "us-west-1";
+
+const s3Client = new S3Client({region: REGION})
+
 let crypto:any
 try {
     crypto = require('crypto');
@@ -231,7 +231,7 @@ export async function ensureUserBucket(appId:string) {
     const bucketId = (appId+'-users').toLowerCase()
     const accountId = '545650260286' // TODO: probably should go into credentials if not in the ini somehow
 
-    Log.trace('Checking for user bucket '+bucketId)
+    Log.Trace('Checking for user bucket '+bucketId)
     // check if bucket exists
     // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/headbucketcommand.html
     const command = new HeadBucketCommand({
@@ -240,7 +240,7 @@ export async function ensureUserBucket(appId:string) {
     });
     const response = await s3Client.send(command).catch((e:Error) => {
         if (e.message !== 'NotFound') {
-            Log.exception('ensureUserBucket/HeadBucketCommand', e)
+            Log.Exception(e)
         }
     })
     const code = (response && response.$metadata.httpStatusCode) || 0
@@ -248,25 +248,25 @@ export async function ensureUserBucket(appId:string) {
 
     let success = exists
 
-    Log.trace('bucket exists? '+exists)
+    Log.Trace('bucket exists? '+exists)
 
     if(!exists) {
         // create it if not
-        Log.info('Creating new user bucket for application ' + appId)
+        Log.Info('Creating new user bucket for application ' + appId)
         // https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/createbucketcommand.html
         const command = new CreateBucketCommand({
             ACL: "private",
             Bucket: bucketId,
         });
         const response = await s3Client.send(command).catch((e: Error) => {
-            Log.exception('ensureUserBucket/CreateBucketCommand', e)
+            Log.Exception('ensureUserBucket/CreateBucketCommand', e)
         })
         const code = (response && response.$metadata.httpStatusCode) || 0
         success = code >= 200 && code < 300
 
         if(success) {
-            Log.trace('successfully created bucket '+ bucketId)
-            Log.trace('now making stub user')
+            Log.Trace('successfully created bucket '+ bucketId)
+            Log.Trace('now making stub user')
             // make a stub user
             const userData = new UserSsoInfo()
             userData.userToken = '--stub-entry-only--'
@@ -276,7 +276,7 @@ export async function ensureUserBucket(appId:string) {
             userData.lastName = "Stub"
 
             const userId = await makeNewUser(appId, userData)
-            Log.trace('Stub user created as userId '+ userId)
+            Log.Trace('Stub user created as userId '+ userId)
 
 
         }
@@ -294,20 +294,20 @@ Let's keep an index of provider+token to userID for fast lookup
 let tokenIndex:any = {}
 
 async function readTokenIndex(bucketId:string) {
-    Log.trace('Reading tokenIndex from '+bucketId)
+    Log.Trace('Reading tokenIndex from '+bucketId)
     const command = new GetObjectCommand({
         Bucket: bucketId,
         Key: 'tokenIndex'
     });
     const response = await s3Client.send(command).catch((e:Error) => {
-        Log.exception('readTokenIndex', e)
+        Log.Exception('readTokenIndex', e)
     })
     const code = (response && response.$metadata.httpStatusCode) || 0
     const success = code >= 200 && code < 300
     if(success) {
         const data = await resolveResponseObject(response)
         if(data) {
-            Log.trace('tokenIndex loaded with ' + Object.getOwnPropertyNames(data).length + ' entries')
+            Log.Trace('tokenIndex loaded with ' + Object.getOwnPropertyNames(data).length + ' entries')
             console.log(data)
             tokenIndex = data
         }
@@ -329,7 +329,7 @@ async function addNewUser(user:User) {
             Body: str
         });
         const response = await s3Client.send(command).catch((e:Error) => {
-            Log.exception('addNewUser', e)
+            Log.Exception('addNewUser', e)
         })
         const code = (response && response.$metadata.httpStatusCode) || 0
         const success = code >= 200 && code < 300
@@ -359,25 +359,25 @@ async function makeNewUser(appId:string, userData:any) {
 
 export async function onboardUser(appId:string, userData:UserSsoInfo): Promise<string> {
     const provToken = userData.provider+userData.userToken
-    Log.trace('onboarding user by provider token '+provToken)
+    Log.Trace('onboarding user by provider token '+provToken)
     let userId = tokenIndex[provToken]
     let p = Promise.resolve(userId)
     if(userId) {
-        Log.trace('found userId '+userId)
+        Log.Trace('found userId '+userId)
     } else {
-        Log.trace('user not found')
+        Log.Trace('user not found')
         userId = await associateUser(appId, userData)
         if(!userId) {
-            Log.trace('treating as new user')
+            Log.Trace('treating as new user')
             userId = await makeNewUser(appId, userData)
         }
     }
-    Log.trace('associated to userId '+userId)
+    Log.Trace('associated to userId '+userId)
     return userId
 }
 
 async function associateUser(appId:string, userData:UserSsoInfo): Promise<string> {
-    Log.trace('associating user')
+    Log.Trace('associating user')
     let foundUserId = ''
     let p = Promise.resolve(true)
     await enumerateUsers(appId, (user:User) => {
@@ -419,7 +419,7 @@ export async function fetchUser(appId:string, userId:string): Promise<User> {
         Key: userId
     });
     const response = await s3Client.send(command).catch((e:Error) => {
-        Log.exception('fetchUser', e)
+        Log.Exception('fetchUser', e)
     })
     const code = (response && response.$metadata.httpStatusCode) || 0
     const success = code >= 200 && code < 300
@@ -445,7 +445,7 @@ export async function saveUser(user:User): Promise<boolean> {
         Body: userPersist
     });
     const response = await s3Client.send(command).catch((e:Error) => {
-        Log.exception('saveUser', e)
+        Log.Exception('saveUser', e)
     })
     const code = (response && response.$metadata.httpStatusCode) || 0
     const success = code >= 200 && code < 300
