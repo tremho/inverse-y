@@ -300,14 +300,14 @@ export enum Method {
 export class ServiceDefinition {
     name: string = ''
     version? :string
-    description: string = ''
+    description?: string = ''
     uri: string = ''
-    allowedMethods: string = ''
-    logLevel: LogLevel = LogLevel.None
-    parameters: ParamDef[] = []
-    returns: ReturnDef = new ReturnDef()
-    sessionRequired: boolean = true
-    userRequired: boolean = false
+    allowedMethods?: string = 'POST'
+    logLevel?: LogLevel = LogLevel.None
+    parameters?: ParamDef[] = []
+    returns?: ReturnDef = new ReturnDef()
+    sessionRequired?: boolean = true
+    userRequired?: boolean = false
     onRequest?: (request: RequestEvent) => void
 }
 

@@ -22,6 +22,7 @@ import {
 
 import {
     Log,
+    LogLevel,
     LogAtLevel,
     ClearLogs,
     setLoggingLevel,
@@ -47,6 +48,7 @@ export {ServerError as ServerError}
 export {NotImplemented as NotImplemented}
 
 export {Log as Log}
+export {LogLevel as LogLevel}
 export {ClearLogs as ClearLogs}
 export {LogAtLevel as LogAtLevel}
 export {setLoggingLevel as setLoggingLevel}
