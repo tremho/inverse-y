@@ -299,7 +299,7 @@ export class ServiceDefinition {
     description?: string = ''
     uri: string = ''
     allowedMethods?: string = 'POST'
-    logLevel?: LogLevel = LogLevel.None
+    logLevel?:string = 'None'   // will match to enum
     parameters?: ParamDef[] = []
     returns?: ReturnDef = new ReturnDef()
     sessionRequired?: boolean = true
