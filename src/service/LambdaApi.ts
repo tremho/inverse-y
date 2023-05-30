@@ -363,7 +363,7 @@ export class LambdaApi<TEvent> {
         }
 
         const parameters = this.definition.parameters
-        for(let p of parameters) {
+        for(let p of parameters ?? []) {
             buildEvent[p.name] = p.default ?? emptyDefault(p.type)
         }
         let t:TEvent = buildEvent;
@@ -378,7 +378,7 @@ export class LambdaApi<TEvent> {
         const pset = new ParamSet()
         const parameters = this.definition.parameters
         let message = ''
-        for(let p of parameters) {
+        for(let p of parameters ?? []) {
             let v = (event as any)[p.name]  // TODO: Expand to be aware of post parameters in different formats also
             let vresp = p.validate(v)
             if(vresp) {
@@ -410,7 +410,7 @@ export class LambdaApi<TEvent> {
         if(this.handler) {
             var resultObj = this.handler(event);
             if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
-                this.definition.returns.validate(resultObj.result);
+                this.definition.returns?.validate(resultObj.result);
             }
             return this.returnResult (resultObj);
 
@@ -444,7 +444,7 @@ export class LambdaApi<TEvent> {
             out += '</ul>'
         }
         out += `<p>Returns:</p>`
-        out += this.definition.returns.document(format)
+        out += this.definition.returns?.document(format) ?? "Not defined"
         return out
     }
 }

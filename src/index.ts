@@ -20,9 +20,9 @@ import {
     NotImplemented
 } from "./service/Responses";
 
+import {LogLevel} from "./Logging/LogLevel";
 import {
     Log,
-    LogLevel,
     LogAtLevel,
     ClearLogs,
     setLoggingLevel,
