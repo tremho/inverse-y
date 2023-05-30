@@ -1,6 +1,6 @@
 import {RequestEvent} from "../request/EventTypes";
 export {RequestEvent as RequestEvent}
-
+import {LogLevel} from "../Logging/LogLevel"
 
 /**
  * Defines the declaration of a parameter
@@ -277,10 +277,6 @@ export class ParamSet {
     get(name:string) {
         return this.body[name]
     }
-}
-
-enum LogLevel {
-    None
 }
 
 /** Types of methods **/
