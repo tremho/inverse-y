@@ -1,6 +1,5 @@
 import {RequestEvent} from "../request/EventTypes";
 export {RequestEvent as RequestEvent}
-import {LogLevel} from "../Logging/LogLevel"
 
 /**
  * Defines the declaration of a parameter
@@ -173,7 +172,7 @@ export class ReturnDef {
         if(!typeOk) {
             throw Error(`Return type ${types} expected, ${vt} found (${trace})`)
         }
-        if(vt === 'object' && this.props.length) {
+        if(vt === 'object' && this.props?.length) {
             for(let p of this.props) {
                 let rv = value[p.name]
                 if(rv === undefined && p.default !== undefined) {
@@ -242,7 +241,7 @@ export class ReturnDef {
         out += `</p><p>`
         out += this.description
         out += '</p>'
-        if(this.props.length) {
+        if(this.props?.length) {
             out += '<p>detail:</p>'
             out += '<li>'
             for(let p of this.props) {
