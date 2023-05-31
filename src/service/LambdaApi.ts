@@ -392,7 +392,7 @@ export class LambdaApi<TEvent> {
 
     entryPoint(event: TEvent|RequestEvent) {
         if((event as RequestEvent).version) {
-            if(typeof this.definition.onRequest === 'function') {
+            if(typeof this?.definition?.onRequest === 'function') {
                 this.definition.onRequest(event as RequestEvent);
             }
             // assume this is a request. our event payload is in the body
@@ -400,19 +400,19 @@ export class LambdaApi<TEvent> {
         }
         const v = this.validate((event as TEvent))
         if (typeof v === 'string') {
-            return this.returnResult({statusCode: 500, result: "Parameter validation fails: "+v})
+            return LambdaApi.returnResult({statusCode: 500, result: "Parameter validation fails: "+v})
         }
         if(this.handler) {
             var resultObj = this.handler(event);
             if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
                 this.definition.returns?.validate(resultObj.result);
             }
-            return this.returnResult (resultObj);
+            return LambdaApi.returnResult (resultObj);
 
         }
     }
 
-    returnResult(resp: { result:any, statusCode?:number })
+    static returnResult(resp: { result:any, statusCode?:number })
     {
         return  {
             statusCode: resp.statusCode ?? 200,
