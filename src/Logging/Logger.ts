@@ -5,7 +5,7 @@ import {LogLevel} from "./LogLevel";
 import {Clog, formatClogMessage, setClogLevel} from "./Clog";
 
 const logRecord:string[] = []
-let currentLevel = LogLevel.Error;
+// let currentLevel = LogLevel.Error;
 
 
 /**
@@ -15,13 +15,13 @@ let currentLevel = LogLevel.Error;
  * @param other
  * @constructor
  */
-export function LogAtLevel(level:LogLevel, message:string, ...other:any[]) {
+export function LogAtLevel(level:any, message:string, ...other:any[]) {
     Clog(level, message, other);
-    if(level < currentLevel) {
+    // if(level < currentLevel) {
         let [others] = other // TODO: handle at some point as json appended
         const outline = formatClogMessage(level, message)
         logRecord.push(outline);
-    }
+    // }
 }
 
 /**
@@ -37,10 +37,10 @@ export function ClearLogs() {
  * @param level - sets the level for recorded logs, and console output if consoleLevel is not given
  * @param [consoleLevel] - if given, sets a separate level for console output
  */
-export function setLoggingLevel(level:LogLevel, consoleLevel?:LogLevel) {
-    currentLevel = level;
-    if(!consoleLevel) consoleLevel = level;
-    setClogLevel(consoleLevel);
+export function setLoggingLevel(level:any, consoleLevel?:LogLevel) {
+    // currentLevel = level;
+    // if(!consoleLevel) consoleLevel = level;
+    // setClogLevel(consoleLevel);
 }
 
 /**
