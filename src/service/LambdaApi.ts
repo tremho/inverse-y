@@ -133,7 +133,7 @@ export class ParamDef {
 export class ReturnDef {
     type: 'file'|'text'|'js'|''
     description: string = ''
-    props: ParamDef[] = []
+    props?: ParamDef[] = []
 
     constructor(type?:'file'|'text'|'js'|'', description?:string, props:ParamDef[] = []) {
         this.type = type || ''
