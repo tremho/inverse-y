@@ -1,12 +1,12 @@
 
 // create an array of logs in memory we can export later
 // also send logs to CLog for console output
+import {LogLevel} from "./LogLevel";
+import {Clog, formatClogMessage, setClogLevel} from "./Clog";
 
 const logRecord:string[] = []
 let currentLevel = LogLevel.Error;
 
-import {LogLevel} from "./LogLevel";
-import {Clog, formatClogMessage, setClogLevel} from "./Clog";
 
 /**
  * Logs a message at the given log level
