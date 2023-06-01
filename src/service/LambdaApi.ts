@@ -400,6 +400,7 @@ export class LambdaApi<TEvent> {
             // assume this is a request. our event payload is in the body
             event = (event as RequestEvent).body;
         }
+        return Success("Got this far -- test")
         console.log("EntryPoint validation")
         const v = this.validate((event as TEvent))
         console.log("EntryPoint validation v = ", v)
