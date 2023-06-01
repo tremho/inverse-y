@@ -1,4 +1,5 @@
 import {RequestEvent} from "../request/EventTypes";
+import {ServerError, Success} from "./Responses";
 export {RequestEvent as RequestEvent}
 
 /**
@@ -404,13 +405,14 @@ export class LambdaApi<TEvent> {
         console.log("EntryPoint validation v = ", v)
         if (typeof v === 'string') {
             console.log("EntryPoint validation v  is string")
-            return this.returnResult({statusCode: 500, result: "Parameter validation fails: "+v})
+            return ServerError("Parameter validation fails: "+v)
         }
         console.log("EntryPoint calling  handler")
         if(this.handler) {
             var resultObj = this.handler(event);
             if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
                 this.definition.returns?.validate(resultObj.result);
+                return Success(resultObj.result);
             }
             return this.returnResult (resultObj);
 
