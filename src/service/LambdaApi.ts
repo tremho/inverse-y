@@ -409,7 +409,7 @@ export class LambdaApi<TEvent> {
         }
         console.log("EntryPoint calling  handler")
         if(this.handler) {
-            return this.handler(event).then(result:any => {
+            return this.handler(event).then((result:any) => {
                 return result;
             })
             // var resultObj = this.handler(event);
