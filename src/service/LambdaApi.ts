@@ -391,7 +391,7 @@ export class LambdaApi<TEvent> {
         return pset
     }
 
-    entryPoint(event: TEvent|RequestEvent) {
+    async entryPoint(event: TEvent|RequestEvent) {
         console.log("EntryPoint")
         if((event as RequestEvent).version) {
             if(typeof this.definition.onRequest === 'function') {
@@ -409,7 +409,7 @@ export class LambdaApi<TEvent> {
         }
         console.log("EntryPoint calling  handler")
         if(this.handler) {
-            return this.handler(event);
+            return await this.handler(event);
             // var resultObj = this.handler(event);
             // if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
             //     this.definition.returns?.validate(resultObj.result);
