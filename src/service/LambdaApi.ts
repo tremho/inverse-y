@@ -409,12 +409,13 @@ export class LambdaApi<TEvent> {
         }
         console.log("EntryPoint calling  handler")
         if(this.handler) {
-            var resultObj = this.handler(event);
-            if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
-                this.definition.returns?.validate(resultObj.result);
-                return Success(resultObj.result);
-            }
-            return this.returnResult (resultObj);
+            return this.handler(event);
+            // var resultObj = this.handler(event);
+            // if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
+            //     this.definition.returns?.validate(resultObj.result);
+            //     return Success(resultObj.result);
+            // }
+            // return this.returnResult (resultObj);
 
         }
     }
