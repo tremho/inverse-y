@@ -308,7 +308,7 @@ export class ServiceDefinition {
 }
 
 /** Declares the callback format for handling service API business */
-export type Handler = (event?:any) => any
+export type Handler = (event?:any) => Promise<any>
 
 /**
  * The handling object for a declared Service
@@ -391,7 +391,7 @@ export class LambdaApi<TEvent> {
         return pset
     }
 
-    async entryPoint(event: TEvent|RequestEvent) {
+    entryPoint(event: TEvent|RequestEvent) {
         console.log("EntryPoint")
         if((event as RequestEvent).version) {
             if(typeof this.definition.onRequest === 'function') {
@@ -409,7 +409,9 @@ export class LambdaApi<TEvent> {
         }
         console.log("EntryPoint calling  handler")
         if(this.handler) {
-            return await this.handler(event);
+            return this.handler(event).then(result:any => {
+                return result;
+            })
             // var resultObj = this.handler(event);
             // if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
             //     this.definition.returns?.validate(resultObj.result);
