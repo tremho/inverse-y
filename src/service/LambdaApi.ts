@@ -410,8 +410,8 @@ export class LambdaApi<TEvent> {
         console.log("EntryPoint calling  handler")
         if(this.handler) {
             return this.handler(event).then((result:any) => {
-                console.log("returning result of handler")
-                return result;
+                console.log("returning result of handler", result)
+                return this.returnResult(result);
             })
             // var resultObj = this.handler(event);
             // if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
