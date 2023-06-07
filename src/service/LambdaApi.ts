@@ -411,7 +411,7 @@ export class LambdaApi<TEvent> {
         if(this.handler) {
             return this.handler(event).then((result:any) => {
 
-                return "HELLO RESPONSE BODY";
+                return {body: "HELLO RESPONSE BODY"};
 
                 console.log("returning result of handler", result)
                 return this.returnResult(result);
