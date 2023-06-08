@@ -409,7 +409,10 @@ export class LambdaApi<TEvent> {
         }
         console.log("EntryPoint calling  handler")
         if(this.handler) {
-            return this.handler(event).then((result:any) => {
+            console.log("calling handler, expecting promise")
+            const p = this.handler(event)
+            console.log("got promise back, waiting..", p)
+            return p.then((result:any) => {
                 console.log("returning result of handler", result)
                 return this.returnResult(result);
             })
