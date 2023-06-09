@@ -391,7 +391,7 @@ export class LambdaApi<TEvent> {
         return pset
     }
 
-    entryPoint(event: TEvent|RequestEvent) {
+    entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
         console.log("EntryPoint")
         if((event as RequestEvent).version) {
             if(typeof this.definition.onRequest === 'function') {
@@ -414,7 +414,7 @@ export class LambdaApi<TEvent> {
             console.log("got promise back, waiting..", p)
             return p.then((result:any) => {
                 console.log("returning result of handler", result)
-                return this.returnResult(result);
+                callback(result);
             })
             // var resultObj = this.handler(event);
             // if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
