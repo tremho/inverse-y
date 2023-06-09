@@ -308,7 +308,7 @@ export class ServiceDefinition {
 }
 
 /** Declares the callback format for handling service API business */
-export type Handler = (event?:any, context?:any, callback?:any) => Promise<any>
+export type Handler = (event?:any) => Promise<any>
 
 /**
  * The handling object for a declared Service
@@ -392,7 +392,7 @@ export class LambdaApi<TEvent> {
     }
 
     entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
-        console.log("EntryPoint")
+        console.log("EntryPoint", {context, callback})
         if((event as RequestEvent).version) {
             if(typeof this.definition.onRequest === 'function') {
                 this.definition.onRequest(event as RequestEvent);
@@ -410,10 +410,10 @@ export class LambdaApi<TEvent> {
         console.log("EntryPoint calling  handler")
         if(this.handler) {
             console.log("calling handler, expecting promise")
-            const p = this.handler(event, context, callback)
+            const p = this.handler(event)
             console.log("got promise back, waiting..", p)
             return p.then((result:any) => {
-                console.log("returning result of handler", result)
+                console.log("returning result of handler via callback", result)
                 callback(result);
             })
             // var resultObj = this.handler(event);
