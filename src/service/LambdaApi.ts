@@ -392,7 +392,9 @@ export class LambdaApi<TEvent> {
     }
 
     entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
-        console.log("EntryPoint", {context, callback})
+        console.log("EntryPoint")
+        console.log("context", context);
+        console.log("callback", callback);
         if((event as RequestEvent).version) {
             if(typeof this.definition.onRequest === 'function') {
                 this.definition.onRequest(event as RequestEvent);
@@ -414,7 +416,8 @@ export class LambdaApi<TEvent> {
             console.log("got promise back, waiting..", p)
             return p.then((result:any) => {
                 console.log("returning result of handler via callback", result)
-                callback(result);
+                if (typeof(callback) == 'function') callback(result);
+                else console.error("Callback is not a function!", callback)
             })
             // var resultObj = this.handler(event);
             // if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
