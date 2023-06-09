@@ -413,12 +413,13 @@ export class LambdaApi<TEvent> {
         if(this.handler) {
             console.log("calling handler, expecting promise")
             const p = this.handler(event)
-            console.log("got promise back, waiting..", p)
-            return p.then((result:any) => {
-                console.log("returning result of handler via callback", result)
-                if (typeof(callback) == 'function') callback(result);
-                else console.error("Callback is not a function!", callback)
-            })
+            console.log("got promise back, returnng..", p)
+            return p;
+            // return p.then((result:any) => {
+            //     console.log("returning result of handler via callback", result)
+            //     if (typeof(callback) == 'function') callback(result);
+            //     else console.error("Callback is not a function!", callback)
+            // })
             // var resultObj = this.handler(event);
             // if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
             //     this.definition.returns?.validate(resultObj.result);
