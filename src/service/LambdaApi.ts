@@ -1,5 +1,6 @@
 import {RequestEvent} from "../request/EventTypes";
 import {ServerError, Success} from "./Responses";
+import {Log} from "../Logging/Logger"
 export {RequestEvent as RequestEvent}
 
 /**
@@ -392,9 +393,9 @@ export class LambdaApi<TEvent> {
     }
 
     entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
-        console.log("EntryPoint")
-        console.log("context", context);
-        console.log("callback", callback);
+        // console.log("EntryPoint")
+        // console.log("context", context);
+        // console.log("callback", callback);
         if((event as RequestEvent).version) {
             if(typeof this.definition.onRequest === 'function') {
                 this.definition.onRequest(event as RequestEvent);
@@ -402,30 +403,22 @@ export class LambdaApi<TEvent> {
             // assume this is a request. our event payload is in the body
             event = (event as RequestEvent).body;
         }
-        console.log("EntryPoint validation")
+        // console.log("EntryPoint validation")
         const v = this.validate((event as TEvent))
-        console.log("EntryPoint validation v = ", v)
+        // console.log("EntryPoint validation v = ", v)
         if (typeof v === 'string') {
-            console.log("EntryPoint validation v  is string")
+            // console.log("EntryPoint validation v  is string")
             return ServerError("Parameter validation fails: "+v)
         }
         console.log("EntryPoint calling  handler")
         if(this.handler) {
-            console.log("calling handler, expecting promise")
-            const p = this.handler(event)
-            console.log("got promise back, returnng..", p)
-            return p;
-            // return p.then((result:any) => {
-            //     console.log("returning result of handler via callback", result)
-            //     if (typeof(callback) == 'function') callback(result);
-            //     else console.error("Callback is not a function!", callback)
-            // })
-            // var resultObj = this.handler(event);
-            // if (resultObj.statusCode >= 200 && resultObj.statusCode < 300) {
-            //     this.definition.returns?.validate(resultObj.result);
-            //     return Success(resultObj.result);
-            // }
-            // return this.returnResult (resultObj);
+            try {
+                // console.log("calling handler, expecting promise")
+                return this.handler(event)
+            } catch(e:any) {
+                Log.Exception(e);
+                return ServerError(e.message);
+            }
 
         }
     }
