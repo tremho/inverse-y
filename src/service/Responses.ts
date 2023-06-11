@@ -30,5 +30,5 @@ export function ServerError(message:string) {
 }
 export function NotImplemented(message:string) {
     const statusCode = 501
-    return {statusCode, result: "Internal Server Error: "+message}
+    return {statusCode, result: "Not Implemented: "+message}
 }
