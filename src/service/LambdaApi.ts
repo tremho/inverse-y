@@ -416,6 +416,7 @@ export class LambdaApi<TEvent> {
                 // console.log("calling handler, expecting promise")
                 return this.handler(event)
             } catch(e:any) {
+                console.log("exception caught", e)
                 Log.Exception(e);
                 return ServerError(e.message);
             }
