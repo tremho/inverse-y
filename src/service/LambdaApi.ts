@@ -393,6 +393,10 @@ export class LambdaApi<TEvent> {
     }
 
     entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
+
+        // start with fixup of event being passed in as string
+        if(typeof event === 'string') event = JSON.parse(event);
+
         // console.log("EntryPoint")
         // console.log("context", context);
         // console.log("callback", callback);
