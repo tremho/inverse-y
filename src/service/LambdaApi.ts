@@ -278,6 +278,11 @@ export class ParamSet {
     get(name:string) {
         return this.body[name]
     }
+    validate(name:string) {
+        const v = this.body[name];
+        // todo: somehow verify this value is of proper type and constraint
+        // if not, return an error object with a message
+    }
 }
 
 /** Types of methods **/
