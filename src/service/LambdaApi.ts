@@ -278,11 +278,6 @@ export class ParamSet {
     get(name:string) {
         return this.body[name]
     }
-    validate(name:string) {
-        const v = this.body[name];
-        // todo: somehow verify this value is of proper type and constraint
-        // if not, return an error object with a message
-    }
 }
 
 /** Types of methods **/
@@ -382,13 +377,15 @@ export class LambdaApi<TEvent> {
         let message = ''
         for(let p of parameters ?? []) {
             let v = (event as any)[p.name]  // TODO: Expand to be aware of post parameters in different formats also
-            let vresp = p.validate(v)
-            if(vresp) {
-                if(message) message += '\n'
-                message += vresp
-            } else {
+
+            // todo: validate paramenter for type and constraint
+            // let vresp = p.validate(v)
+            // if(vresp) {
+            //     if(message) message += '\n'
+            //     message += vresp
+            // } else {
                 pset.set(p.name, v)
-            }
+            // }
         }
         if(message) {
             // invalid
