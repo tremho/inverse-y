@@ -420,7 +420,7 @@ export class LambdaApi<TEvent> {
         if(this.handler) {
             try {
                 // console.log("calling handler, expecting promise")
-                return this.handler(event)
+                return this.handler(event).then(this.returnResult)
             } catch(e:any) {
                 console.log("exception caught", e)
                 Log.Exception(e);
@@ -430,7 +430,7 @@ export class LambdaApi<TEvent> {
         }
     }
 
-    returnResult(resp: { result:any, statusCode?:number })
+    returnResult(resp: { result:any, statusCode?:number, headers?:any })
     {
         return  {
             statusCode: resp.statusCode ?? 200,
