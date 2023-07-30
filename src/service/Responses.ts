@@ -28,6 +28,10 @@ export function ServerError(message:string) {
     const statusCode = 500
     return {statusCode, result: "Internal Server Error: "+message}
 }
+export function ServerException(e:Error) {
+    const msg = e.message+e.stack;
+    return ServerError(msg);
+}
 export function NotImplemented(message:string) {
     const statusCode = 501
     return {statusCode, result: "Not Implemented: "+message}
