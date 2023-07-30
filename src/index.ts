@@ -30,6 +30,10 @@ import {
     collectLogs
 } from "./Logging/Logger"
 
+import {serverInstance} from "./service/ServerInstance";
+
+export {serverInstance as serverInstance}
+
 // export all from LambdaApi
 export {LambdaApi as LambdaApi}
 export {Handler as Handler}
