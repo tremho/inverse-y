@@ -17,6 +17,7 @@ import {
     NotFound,
     MethodNotAllowed,
     ServerError,
+    ServerException,
     NotImplemented
 } from "./service/Responses";
 
@@ -45,6 +46,7 @@ export {Forbidden as Forbidden}
 export {NotFound as NotFound}
 export {MethodNotAllowed as MethodNotAllowed}
 export {ServerError as ServerError}
+export {ServerException as ServerException}
 export {NotImplemented as NotImplemented}
 
 export {Log as Log}
