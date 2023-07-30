@@ -29,8 +29,7 @@ export function ServerError(message:string) {
     return {statusCode, result: "Internal Server Error: "+message}
 }
 export function ServerException(e:Error) {
-    const msg = e.message+e.stack;
-    return ServerError(msg);
+    return ServerError(e.stack ?? e.message ?? "");
 }
 export function NotImplemented(message:string) {
     const statusCode = 501
