@@ -293,6 +293,9 @@ export enum Method {
 
 /**
  * The definition of the service
+ * TODO: THis should migrate to a new file and update to what we actually are using
+ * 2do - try to make it extensible, like ServiceDefinitionBase and the local implementations are ServiceDefinition extends base...
+ * 2do = because this has no meaning here, only in the tbdcli contexts... but it's good to have a baseline
  */
 export class ServiceDefinition {
     name: string = ''
@@ -403,11 +406,14 @@ export class LambdaApi<TEvent> {
         // console.log("context", context);
         // console.log("callback", callback);
         if((event as RequestEvent).version) {
+            throw Error("Found a case of RequestEvent -- Don't remove that code after all!!");
+            /*
             if(typeof this.definition.onRequest === 'function') {
                 this.definition.onRequest(event as RequestEvent);
             }
             // assume this is a request. our event payload is in the body
             event = (event as RequestEvent).body;
+             */
         }
         // console.log("EntryPoint validation")
         const v = this.validate((event as TEvent))

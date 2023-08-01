@@ -16,7 +16,8 @@ const logRecord:string[] = []
  * @constructor
  */
 export function LogAtLevel(level:any, message:string, ...other:any[]) {
-    let [others] = other // TODO: handle at some point as json appended
+    let [others] = other //
+    // TODO: handle at some point as json appended
     Clog(level, message, others);
     // if(level < currentLevel) {
         const outline = formatClogMessage(level, message)
