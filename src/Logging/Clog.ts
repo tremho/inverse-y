@@ -40,7 +40,7 @@ export function setClogLevel(level:LogLevel) {
     clogLevel = level
 }
 
-export function formatClogMessage(level:LogLevel, message:string) {
+export function formatClogMessage(level:LogLevel, message:string, inColor=true) {
     // [levl] yyyy-mm-dd hh:mm:ss.sss message text here
     let date = new Date();
     const yr = date.getFullYear()
@@ -56,30 +56,32 @@ export function formatClogMessage(level:LogLevel, message:string) {
     if(sec.length === 1) sec = '0'+sec
     let ms = ''+date.getMilliseconds();
     while(ms.length < 3) ms+= '0'
-    let datestr = ansiColors.gray(`${yr}-${mo}-${dy} ${hr}:${mn}:${sec}.${ms}`)
+    let datestr = `${yr}-${mo}-${dy} ${hr}:${mn}:${sec}.${ms}`;
+    if (inColor) datestr = ansiColors.gray(datestr);
 
-    return  `${tag(level)} ${datestr} ${textColor(level,message)}`+ansiColors.reset("")
+    return  `${tag(level, inColor)} ${datestr} ${textColor(level,message,inColor)}`+ inColor ? ansiColors.reset("") : "";
 }
-function tag(level:LogLevel) {
+function tag(level:LogLevel, inColor:boolean) {
     switch(level) {
         case LogLevel.Critical:
-            return ansiColors.bgRed.whiteBright("CRIT")
+            return inColor ? ansiColors.bgRed.whiteBright("CRIT") : "CRIT"
         case LogLevel.Exception:
-            return ansiColors.bgBlack.redBright("EXCP")
+            return inColor? ansiColors.bgBlack.redBright("EXCP") : "EXCP"
         case LogLevel.Error:
-            return ansiColors.bgRed.white("ERR!")
+            return inColor ? ansiColors.bgRed.white("ERR!") : "ERR!"
         case LogLevel.Warning:
-            return ansiColors.bgYellow.black("WARN")
+            return inColor ? ansiColors.bgYellow.black("WARN") : "WARN"
         case LogLevel.Info:
-            return ansiColors.bgMagenta.white("INFO")
+            return inColor ? ansiColors.bgMagenta.white("INFO") : "INFO"
         case LogLevel.Debug:
-            return ansiColors.bgBlue.white("DBUG")
+            return inColor ? ansiColors.bgBlue.white("DBUG") : "DBUG"
         case LogLevel.Trace:
         default:
-            return ansiColors.bgBlackBright.cyanBright("TRAC")
+            return inColor ? ansiColors.bgBlackBright.cyanBright("TRAC") : "TRAC"
     }
 }
-function textColor(level:LogLevel, message:string) {
+function textColor(level:LogLevel, message:string, inColor:boolean) {
+    if(!inColor) return message;
     switch(level) {
         case LogLevel.Critical:
             return ansiColors.red(message)

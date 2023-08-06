@@ -11,6 +11,8 @@ export {RequestEvent as RequestEvent}
 export class ParamDef {
     name: string = ''
     type: string = ''
+    "in": string = '' // path, query, body
+    "required"?: boolean
     description: string = ''
     default?: string
     min?: number = 0
@@ -37,92 +39,68 @@ export class ParamDef {
             if (options.match) this.match = options.match
         }
     }
+}
 
-    /**
-     * validate a value received for this parameter
-     * @param value
-     *
-     * @return empty string if no error, otherwise a description of the error
-     */
-    validate(value:any):string {
-        if(value === undefined && this.default !== undefined) {
-            value = this.default
+// Returns a string. if the string != '' it is an validation error message
+function validateParameter(p:ParamDef, value:any): string
+{
+    if(value === undefined && p.default !== undefined) {
+        value = p.default
+    }
+    let vt:string = typeof value
+    if(vt === 'object') {
+        if(Array.isArray(value)) {
+            vt = typeof value[0]
+            if(vt === 'undefined') vt = ''
+            vt += '[]'  // e.g. string[] or number[]
         }
-        let vt:string = typeof value
-        if(vt === 'object') {
-            if(Array.isArray(value)) {
-                vt = typeof value[0]
-                if(vt === 'undefined') vt = ''
-                vt += '[]'  // e.g. string[] or number[]
+    }
+    let typeOk = false
+    const types = p.type.split('|')
+    for(let t of types) {
+        t = t.trim()
+        if(vt === t) {
+            typeOk = true
+            break;
+        }
+    }
+    if(!typeOk) {
+        return `Expected parameter "${p.name}" type to be ${p.type}, got ${vt}`
+    }
+    if(vt === 'number') {
+        if(p.min !== undefined) {
+            if(value < p.min) {
+                return `Parameter "${p.name}" value of ${value} is less than ${p.min}`
             }
         }
-        let typeOk = false
-        const types = this.type.split('|')
-        for(let t of types) {
-            t = t.trim()
-            if(vt === t) {
-                typeOk = true
+        if(p.max !== undefined) {
+            if(value > p.max) {
+                return `Parameter "${p.name}" value of ${value} is greater than ${p.max}`
+            }
+        }
+    }
+    if(p.oneOf && p.oneOf.length) {
+        let found = false
+        for(let t of p.oneOf) {
+            if(value === t) {
+                found = true;
                 break;
             }
         }
-        if(!typeOk) {
-            throw Error(`Expected parameter "${this.name}" type to be ${this.type}, got ${vt}`)
+        if(!found) {
+            return `Parameter "${p.name}" value "${value}" is not one of ${p.oneOf}`
         }
-        if(vt === 'number') {
-            if(this.min !== undefined) {
-                if(value < this.min) {
-                    return `Parameter "${this.name}" value of ${value} is less than ${this.min}`
-                }
-            }
-            if(this.max !== undefined) {
-                if(value > this.max) {
-                    return `Parameter "${this.name}" value of ${value} is greater than ${this.max}`
-                }
-            }
-        }
-        if(this.oneOf && this.oneOf.length) {
-            let found = false
-            for(let t of this.oneOf) {
-                if(value === t) {
-                    found = true;
-                    break;
-                }
-            }
-            if(!found) {
-                throw Error(`Parameter "${this.name}" value "${value}" is not one of ${this.oneOf}`)
-            }
-        }
-        if(vt === 'string') {
-            if(this.match) {
-                const str:string = value
-                const regx = new RegExp(this.match)
-                if(!str.match(regx)) {
-                    throw Error(`Parameter "${this.name}" value string "${value}" does not match pattern "${this.match}"`)
-                }
-            }
-        }
-        return ''
     }
-
-    /**
-     * Documentation output for this parameter
-     */
-    document(format = 'html') {
-        let out = '<li>'
-        out += '<p>'
-        if(this.default || this.type.indexOf('undefined') !== -1) {
-            out += '['
+    if(vt === 'string') {
+        if(p.match) {
+            const str:string = value
+            const regx = new RegExp(p.match)
+            if(!str.match(regx)) {
+                return `Parameter "${p.name}" value string "${value}" does not match pattern "${p.match}"`;
+            }
         }
-        out += `<strong>${this.name}</strong> {${this.type}}`
-        if(this.default || this.type.indexOf('undefined') !== -1) {
-            out += `] (default = ${this.default}`
-        }
-        out += `</p><p>`
-        out += this.description
-        out += '</p>'
-        // out += '</li>'
-        return out
     }
+    return ''
 }
 
 /**
@@ -132,7 +110,14 @@ export class ParamDef {
  * @throws Error on validation problem
  */
 export class ReturnDef {
-    type: 'file'|'text'|'js'|''
+    type?: string
+    schema?: object // schema or type
+    content?: string
+    mime?: string // alias for content
+    min?: number = 0
+    max?: number = Number.MAX_SAFE_INTEGER
+    oneOf?: string[] = []
+    match?: string|RegExp = ''
     description: string = ''
     props?: ParamDef[] = []
 
@@ -140,129 +125,6 @@ export class ReturnDef {
         this.type = type || ''
         this.description = description || ''
         this.props = props
-    }
-
-    validate(value:any) {
-        let trace = ''
-        let vt:string = typeof value
-        trace = 'value in = '+value;
-        if(vt === 'object') {
-            trace = 'vt is object'
-            if(Array.isArray(value)) {
-                vt = typeof value[0]
-                if(vt === 'undefined') vt = ''
-                vt += '[]'  // e.g. string[] or number[]
-            }
-        }
-        let typeOk = false
-        const types = this.type.split('|')
-        for(let t of types) {
-            t = t.trim()
-            if(t === 'file' || t === 'text') t = 'string' // value is path
-            if(t === 'js') {
-                t = 'object'
-                if(vt === 'undefined') {
-                    vt = 'object'
-                    value = {}
-                }
-            }
-            if(vt === t) {
-                typeOk = true
-                break;
-            }
-        }
-        if(!typeOk) {
-            throw Error(`Return type ${types} expected, ${vt} found (${trace})`)
-        }
-        if(vt === 'object' && this.props?.length) {
-            for(let p of this.props) {
-                let rv = value[p.name]
-                if(rv === undefined && p.default !== undefined) {
-                    rv = p.default
-                }
-                let vt:string = typeof rv
-                if(vt === 'object') {
-                    if(Array.isArray(value)) {
-                        vt = typeof value[0]
-                        if(vt === 'undefined') vt = ''
-                        vt += '[]'  // e.g. string[] or number[]
-                    }
-                }
-                let typeOk = false
-                const types = p.type.split('|')
-                for(let t of types) {
-                    t = t.trim()
-                    if(vt === t) {
-                        typeOk = true
-                        break;
-                    }
-                }
-                if(!typeOk) {
-                    throw Error(`Expected return property "${p.name}" to be ${p.type}`)
-                }
-                if(vt === 'number') {
-                    if(p.min !== undefined) {
-                        if(rv < p.min) {
-                            throw Error(`Return property ${p.name} value of ${rv} is less than ${p.min}`)
-                        }
-                    }
-                    if(p.max !== undefined) {
-                        if(rv > p.max) {
-                            throw Error(`Return property ${p.name} value of ${rv} is greater than ${p.max}`)
-                        }
-                    }
-                }
-                if(p.oneOf && p.oneOf.length) {
-                    let found = false
-                    for(let t of p.oneOf) {
-                        if(rv === t) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if(!found) {
-                        throw Error(`Return property ${p.name} value of ${rv} is not one of ${p.oneOf}`)
-                    }
-                }
-                if(vt === 'string') {
-                    if(p.match) {
-                        const str:string = rv
-                        const regx = new RegExp(p.match)
-                        if(!str.match(regx)) {
-                            throw Error(`Return property ${p.name} value of ${rv} does not match pattern "${p.match}"`)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    document(format = 'html') {
-        let out = '<li>'
-        out += '<p>'
-        out += `<strong>${this.type}</strong>`
-        out += `</p><p>`
-        out += this.description
-        out += '</p>'
-        if(this.props?.length) {
-            out += '<p>detail:</p>'
-            out += '<li>'
-            for(let p of this.props) {
-                out += '<p>'
-                if(p.default || this.type.indexOf('undefined') !== -1) {
-                    out += '['
-                }
-                out += `<strong>${p.name}</strong> {${p.type}}`
-                if(p.default || this.type.indexOf('undefined') !== -1) {
-                    out += `] (default = ${p.default}`
-                }
-                out += `</p><p>`
-                out += p.description
-                out += '</p>'
-            }
-            out += '</li>'
-        }
-
-        return out
     }
 }
 
@@ -293,19 +155,37 @@ export enum Method {
 
 /**
  * The definition of the service
- * TODO: THis should migrate to a new file and update to what we actually are using
- * 2do - try to make it extensible, like ServiceDefinitionBase and the local implementations are ServiceDefinition extends base...
- * 2do = because this has no meaning here, only in the tbdcli contexts... but it's good to have a baseline
- */
+ * This has minimal meaning  here; mostly used for openApi / lambda api construction
+ * Keep this definition synchronized with actual JSON templates used
+ *
+ *  "name": "$$FUNCTION_NAME$$",
+ *   "description": "",
+ *   "version": "1.0.0",
+ *   "pathMap": "",
+ *   "allowedMethods": "",
+ *   "logLevel": "Debug",
+ *   "sessionRequired": false,
+ *   "userRequired": false,
+ *   "schemas": {
+ *   },
+ *   "parameters": [],
+ *   "returns": {
+ *       "200": {
+ *           "type"
+ *           "description"
+ *       }
+ *   }
+ *   */
 export class ServiceDefinition {
     name: string = ''
     version? :string
     description?: string = ''
-    uri: string = ''
+    pathMap: string = ''
     allowedMethods?: string = 'POST'
     logLevel?:string = 'None'   // will match to enum
     parameters?: ParamDef[] = []
     returns?: ReturnDef = new ReturnDef()
+    schemas?: object
     sessionRequired?: boolean = true
     userRequired?: boolean = false
     onRequest?: (request: RequestEvent) => void
@@ -379,16 +259,15 @@ export class LambdaApi<TEvent> {
         const parameters = this.definition.parameters
         let message = ''
         for(let p of parameters ?? []) {
-            let v = (event as any)[p.name]  // TODO: Expand to be aware of post parameters in different formats also
+            let place:any = (p.in === 'body') ? ((event as any)?.body) : event;
+            let v = place[p.name]
 
-            // todo: validate paramenter for type and constraint
-            // let vresp = p.validate(v)
-            // if(vresp) {
-            //     if(message) message += '\n'
-            //     message += vresp
-            // } else {
+            let vresp = validateParameter(p, v);
+            if (vresp) {
+                if(message) message += '\n'+vresp;
+            } else {
                 pset.set(p.name, v)
-            // }
+            }
         }
         if(message) {
             // invalid
@@ -426,6 +305,7 @@ export class LambdaApi<TEvent> {
         if(this.handler) {
             try {
                 // console.log("calling handler, expecting promise")
+                // TODO: Validate return
                 return this.handler(event)
             } catch(e:any) {
                 console.log("exception caught", e)
@@ -434,27 +314,5 @@ export class LambdaApi<TEvent> {
             }
 
         }
-    }
-
-
-    /**
-     * document this service api
-     * @param format
-     */
-    document(format = 'html') {
-        const def = this.definition
-        let out = `<h2>${def.name}</h2>`
-        out += `<p>${def.description}</p>`
-        out += `<p>Parameters:</p>`
-        if(this.definition.parameters && this.definition.parameters.length) {
-            out += '<ul>'
-            for (let p of this.definition.parameters) {
-                out += p.document(format)
-            }
-            out += '</ul>'
-        }
-        out += `<p>Returns:</p>`
-        out += this.definition.returns?.document(format) ?? "Not defined"
-        return out
     }
 }
