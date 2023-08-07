@@ -31,8 +31,28 @@ import {
 } from "./Logging/Logger"
 
 import {serverInstance} from "./service/ServerInstance";
-
-export {serverInstance as serverInstance}
+import {
+    nowSeconds,
+    nowSecondsHex,
+    secondsFromHex
+} from "./Support/TimeHelper"
+import {
+    serialize,
+    deserialize,
+    s3PutObject,
+    s3PutText,
+    s3GetResponse,
+    s3Delete,
+    s3GetObject,
+    s3GetText,
+    s3ResolveResponseObject
+} from "./Support/S3Actions"
+import {
+    SlotData,
+    createSiaToken,
+    getSlotIdFromToken,
+    reserveSlotForSIA
+} from "./Support/SiaToken"
 
 // export all from LambdaApi
 export {LambdaApi as LambdaApi}
@@ -59,4 +79,23 @@ export {ClearLogs as ClearLogs}
 export {LogAtLevel as LogAtLevel}
 export {setLoggingLevel as setLoggingLevel}
 export {collectLogs as collectLogs}
+
+export {serverInstance as serverInstance}
+export {nowSeconds as nowSeconds}
+export {nowSecondsHex as nowSecondsHex}
+export {secondsFromHex as secondsFromHex}
+export {serialize as serialize}
+export {deserialize as deserialize}
+export {s3PutObject as s3PutObject}
+export {s3PutText as s3PutText}
+export {s3GetResponse as s3GetResponse}
+export {s3Delete as s3Delete}
+export {s3GetObject as s3GetObject}
+export {s3GetText as s3GetText}
+export {s3ResolveResponseObject as s3ResolveResponseObject}
+export {SlotData as SlotData}
+export {createSiaToken as createSiaToken}
+export {getSlotIdFromToken as getSlotIdFromToken}
+export {reserveSlotForSIA as reserveSlotForSIA}
+
 
