@@ -47,7 +47,7 @@ export async function s3PutText(bucket:string, key:string, text:string)
 export async function s3PutObject(bucket:string, key:string, data:any)
 {
     try {
-        const text = deserialize(data);
+        const text = serialize(data);
         await s3PutText(bucket, key, text);
     }
     catch(e:any) {
@@ -80,7 +80,7 @@ export async function s3GetResponse(bucket:string, key:string)
  * @param bucket
  * @param key
  */
-export async function s3GetText(bucket:string, key:string)
+export async function s3GetText(bucket:string, key:string):string
 {
     return s3ResolveResponseObject(await s3GetResponse(bucket, key));
 }
@@ -90,9 +90,9 @@ export async function s3GetText(bucket:string, key:string)
  * @param bucket
  * @param key
  */
-export async function s3GetObject(bucket:string, key:string)
+export async function s3GetObject(bucket:string, key:string):any
 {
-    return serialize(await s3GetText(bucket, key));
+    return deserialize(await s3GetText(bucket, key));
 }
 
 /**
@@ -122,7 +122,7 @@ export async function s3Delete(bucket:string, key:string)
  * Serialize object to json, or throw serialization exception
  * @param json
  */
-export function serialize(json:any) {
+export function serialize(json:any):string {
     try {
         return JSON.stringify(json);
     }
@@ -135,7 +135,7 @@ export function serialize(json:any) {
  * Deserialize object to json or throw Deserialization exception
  * @param text
  */
-export function deserialize(text:string) {
+export function deserialize(text:string):object {
     try {
         return JSON.parse(text);
     }
