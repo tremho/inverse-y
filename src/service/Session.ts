@@ -25,7 +25,7 @@ let _loginHost = "";
 export class Session {
     id: string = ""
     appId: string = ""
-    authenticatedAt: Date = new Date()
+    authenticatedAt: Date = new Date(0)
     provider: string = ""
     app: any = {}
 }
