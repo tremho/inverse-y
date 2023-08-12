@@ -60,7 +60,7 @@ export async function sessionGet(incomingSessionId:string, hostDomain:string):Pr
  * Check to see if this session is still valid or if a new login is needed
  * @param session
  */
-export async function sessionIsValid(session:Session):Promise<boolean>
+export function sessionIsValid(session:Session):boolean
 {
     const expireMS = 24 * 3600 * 1000; // 24 hours
     var valid = !!session.id;
