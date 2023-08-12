@@ -80,7 +80,7 @@ export async function s3GetResponse(bucket:string, key:string)
  * @param bucket
  * @param key
  */
-export async function s3GetText(bucket:string, key:string):string
+export async function s3GetText(bucket:string, key:string):Promise<string>
 {
     return s3ResolveResponseObject(await s3GetResponse(bucket, key));
 }
@@ -90,7 +90,7 @@ export async function s3GetText(bucket:string, key:string):string
  * @param bucket
  * @param key
  */
-export async function s3GetObject(bucket:string, key:string):any
+export async function s3GetObject(bucket:string, key:string):Promise<any>
 {
     return deserialize(await s3GetText(bucket, key));
 }
