@@ -55,6 +55,7 @@ function validateParameter(p:ParamDef, value:any): string
             vt += '[]'  // e.g. string[] or number[]
         }
     }
+    if(!p.type) p.type = p.default ? typeof p.default : ""
     let typeOk = false
     const types = p.type.split('|')
     for(let t of types) {
