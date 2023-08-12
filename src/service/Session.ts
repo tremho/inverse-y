@@ -67,10 +67,6 @@ export async function sessionIsValid(session:Session):Promise<boolean>
     valid = valid && !!session.provider
     valid = valid && Date.now() - session.authenticatedAt.getTime() < expireMS;
 
-    if (!valid) {
-        s3Delete(BUCKET_SESSION, session.id); // Delete an invalid session.
-    }
-
     return valid
 }
 
