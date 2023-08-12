@@ -31,11 +31,12 @@ import {
 } from "./Logging/Logger"
 
 import {
+    Session,
     sessionGet,
     sessionSave,
     sessionGetLoginPage,
     sessionIsValid
-} from "service/Session"
+} from "./service/Session"
 
 import {serverInstance} from "./service/ServerInstance";
 import {
@@ -105,6 +106,7 @@ export {createSiaToken as createSiaToken}
 export {getSlotIdFromToken as getSlotIdFromToken}
 export {reserveSlotForSIA as reserveSlotForSIA}
 
+export {Session as Session}
 export {sessionGet as sessionGet}
 export {sessionSave as sessionSave}
 export {sessionIsValid as sessionIsValid}
