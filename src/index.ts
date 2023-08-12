@@ -30,6 +30,13 @@ import {
     collectLogs
 } from "./Logging/Logger"
 
+import {
+    sessionGet,
+    sessionSave,
+    sessionGetLoginPage,
+    sessionIsValid
+} from "service/Session"
+
 import {serverInstance} from "./service/ServerInstance";
 import {
     nowSeconds,
@@ -97,5 +104,10 @@ export {SlotData as SlotData}
 export {createSiaToken as createSiaToken}
 export {getSlotIdFromToken as getSlotIdFromToken}
 export {reserveSlotForSIA as reserveSlotForSIA}
+
+export {sessionGet as sessionGet}
+export {sessionSave as sessionSave}
+export {sessionIsValid as sessionIsValid}
+export {sessionGetLoginPage as sessionGetLoginPage}
 
 
