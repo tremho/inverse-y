@@ -87,6 +87,7 @@ export async function getSlotIdFromToken(
     siaToken:string
 ):Promise<string>
 {
+    Log.Trace("getSlotIdFromToken", siaToken);
     const jwt = await jwtVerify(siaToken, serverInstance.secretKey);
     Log.Trace('successful return of jwtVerify (verify SIA)')
     Log.Trace('    ' + JSON.stringify(jwt))
