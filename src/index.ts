@@ -34,7 +34,6 @@ import {
     Session,
     sessionGet,
     sessionSave,
-    sessionGetLoginPage,
     sessionIsValid
 } from "./service/Session"
 
@@ -59,7 +58,8 @@ import {
     SlotData,
     createSiaToken,
     getSlotIdFromToken,
-    reserveSlotForSIA
+    reserveSlotForSIA,
+    getSlotData
 } from "./Support/SiaToken"
 
 // export all from LambdaApi
@@ -104,12 +104,12 @@ export {s3ResolveResponseObject as s3ResolveResponseObject}
 export {SlotData as SlotData}
 export {createSiaToken as createSiaToken}
 export {getSlotIdFromToken as getSlotIdFromToken}
+export {getSlotData as getSlotData}
 export {reserveSlotForSIA as reserveSlotForSIA}
 
 export {Session as Session}
 export {sessionGet as sessionGet}
 export {sessionSave as sessionSave}
 export {sessionIsValid as sessionIsValid}
-export {sessionGetLoginPage as sessionGetLoginPage}
 
 

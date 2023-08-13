@@ -16,8 +16,6 @@ import http from "http";
 
 const BUCKET_SESSION = "tremho-services-session"
 
-let _loginHost = "";
-
 /**
  * Defines the basic properties of a Session.
  * Apps should put all of their specifics in the app section
@@ -25,8 +23,10 @@ let _loginHost = "";
 export class Session {
     id: string = ""
     appId: string = ""
-    authenticatedAt: Date = new Date(0)
     provider: string = ""
+    siaToken:string = ""
+    createdAt: Date = new Date()
+    authenticatedAt: Date = new Date(0)
     app: any = {}
 }
 
@@ -44,10 +44,8 @@ export class Session {
  * @param incomingSessionId
  * @param hostDomain
  */
-export async function sessionGet(incomingSessionId:string, hostDomain:string):Promise<Session>
+export async function sessionGet(incomingSessionId:string):Promise<Session>
 {
-    if(hostDomain) _loginHost = hostDomain;
-
     const session = incomingSessionId ? await s3GetObject(BUCKET_SESSION, incomingSessionId) : new Session();
     if(!session.id) {
         session.id = randomUUID();
@@ -79,36 +77,3 @@ export async function sessionSave(session:Session)
     await s3PutObject(BUCKET_SESSION, session.id, session);
 }
 
-/**
- * Return the HTML page content that initiates the login
- * using the given provider, and for the given application.
- * @param appId
- * @param providerId
- */
-export async function sessionGetLoginPage(appId:string, providerId:string)
-{
-    const jwt = await createSiaToken(appId ?? "");
-    await reserveSlotForSIA(appId ?? "", jwt);
-    const t = Date.now();
-    const page = await sessionSSOforProvider(appId ?? "", providerId ?? "", jwt);
-    return page
-}
-
-async function sessionSSOforProvider(appId:string, providerId:string, siaToken:string)
-{
-    return new Promise(resolve => {
-        http.get(`${_loginHost}/sso/${providerId}.html`, res =>{
-            if(res.statusCode === 200)
-            {
-                let data = '';
-                res.on('data', chunk => { data += chunk });
-                res.on('close', () => {
-                    resolve(data
-                        .replace("SIA_TOKEN_GOES_HERE", siaToken)
-                        .replace("APPID_GOES_HERE", appId)
-                    );
-                })
-            }
-        })
-    })
-}

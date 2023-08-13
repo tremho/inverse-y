@@ -8,7 +8,8 @@ import short from "short-uuid"
 import { SignJWT,jwtVerify } from "jose"
 import sha1 from "sha1"
 import {Log} from "../Logging/Logger"
-import {s3PutObject} from "./S3Actions";
+import {s3PutObject, s3GetObject} from "./S3Actions";
+import {Session} from "../service/Session";
 
 const BUCKET_SIA_SLOTS = 'tremho-services-sia-slots'
 
@@ -28,6 +29,8 @@ try {
 export class SlotData {
     appId: string = ""
     siaToken: string = ""
+    redirect: string = ""
+    sessionId: string = ""
     createdMs: number = Date.now()
     filledMs: number = 0;
     providerData: any = {}
@@ -129,17 +132,18 @@ export async function getSlotIdFromToken(
  * @param siaToken
  */
 export async function reserveSlotForSIA(
-    appId:string,
+    session:Session,
     siaToken:string
 )
 {
     // first off, get the slotId out of the JWT
-    const slotId = await getSlotIdFromToken(appId, siaToken);
+    const slotId = await getSlotIdFromToken(session.appId, siaToken);
 
     // Create empty slot data
     const data = new SlotData();
-    data.appId = appId;
+    data.appId = session.appId;
     data.siaToken = siaToken
+    data.sessionId = session.id;
 
     try {
         await s3PutObject(BUCKET_SIA_SLOTS, slotId, data)
@@ -148,7 +152,19 @@ export async function reserveSlotForSIA(
         Log.Exception(e);
         throw e
     }
-
 }
+
+export async function getSlotData(slotId:string):Promise<SlotData>
+{
+    try {
+        return  await s3GetObject(BUCKET_SIA_SLOTS, slotId)
+    }
+    catch(e) {
+        Log.Exception(e);
+        throw e
+    }
+}
+
+
 
 
