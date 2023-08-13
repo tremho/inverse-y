@@ -14,6 +14,7 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
 {
     const jwt = await createSiaToken(session.appId);
     session.siaToken = jwt;
+    console.log(">>>>>>>>>>>>>>>>>>>>>>> Reserve slot for SIA with session", session)
     await reserveSlotForSIA(session, jwt);
     const t = Date.now();
     // http(s)://mydomain:port/
@@ -24,6 +25,7 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
     let hei = invokingUrl.indexOf('/', ptci+3)
     if(hei === -1) hei = invokingUrl.length;
     const host = invokingUrl.substring(0, hei);
+    console.log(">>>>>>>>>>>>>> Invoking login -- see you on the otehr side...")
     const page = await loadAndReturnPageForProvider(host, session.appId, session.provider, jwt);
     return page
 }
@@ -38,8 +40,10 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
  */
 export async function loginWaitFinish(session:Session, incomingSessionId:string):Promise<Session>
 {
+    console.log(">>>>>>>>>>>>> waiting for login to finish")
     // todo: throw LoginFailed on a timeout
     await waitforSlotResponse(session)
+    console.log(">>>>>>>>>>>> updated session", session);
     return session; // session should be filled at this point
     // but wait -- what we really need to do is call the invoking url again...
     // I think this is best done via a redirect returned by the sso responder
