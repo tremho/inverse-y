@@ -64,6 +64,8 @@ export function sessionIsValid(session:Session):boolean
     const expireMS = 24 * 3600 * 1000; // 24 hours
     var valid = !!session.id;
     valid = valid && !!session.provider
+    console.log(")))))))))))))) Authenticated at "+session.authenticatedAt+" (((((((((((((((")
+    console.log("type = "+(typeof session.authenticatedAt))
     valid = valid && Date.now() - session.authenticatedAt.getTime() < expireMS;
 
     return valid
