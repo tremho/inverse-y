@@ -76,15 +76,20 @@ async function wait(ms:number) {
 async function waitforSlotResponse(session:Session):Promise<boolean> {
 
     return new Promise(resolve => {
+        console.log(">>>>> starting waitForSlotResponse")
         const LoopTillFound:any = async (time: number) => {
+            console.log(".... wait", time)
             await wait(time)
+            console.log(".... checking...")
             if (await checkSlotForResponse(session)) {
+                console.log("... Found!")
                 resolve(true);
             }
             time /= 2
             if (time < 500) {
                 throw Error("Timeout");
             }
+            console.log(".... looping")
             return LoopTillFound(time)
         }
         LoopTillFound(10000);
