@@ -99,6 +99,7 @@ async function waitforSlotResponse(session:Session):Promise<boolean> {
 async function checkSlotForResponse(session:Session):Promise<boolean>
 {
     // get slot from sia
+    console.log("->->->->->->-> Checking slot for session", session)
     const slotId = await getSlotIdFromToken(session.appId, session.siaToken)
     // open the slot
     const slotData = await getSlotData(slotId)
