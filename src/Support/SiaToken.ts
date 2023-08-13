@@ -147,6 +147,7 @@ export async function reserveSlotForSIA(
 
     try {
         await s3PutObject(BUCKET_SIA_SLOTS, slotId, data)
+        console.log("Slot data put at "+slotId)
     }
     catch(e) {
         Log.Exception(e);
@@ -157,9 +158,11 @@ export async function reserveSlotForSIA(
 export async function getSlotData(slotId:string):Promise<SlotData>
 {
     try {
+        console.log("retrieving slot data at "+slotId)
         return  await s3GetObject(BUCKET_SIA_SLOTS, slotId)
     }
     catch(e) {
+        console.error("failed to get slot data at "+slotId)
         Log.Exception(e);
         throw e
     }
