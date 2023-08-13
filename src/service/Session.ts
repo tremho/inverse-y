@@ -44,7 +44,7 @@ export class Session {
  * @param incomingSessionId
  * @param hostDomain
  */
-export async function sessionGet(incomingSessionId:string):Promise<Session>
+export async function sessionGet(incomingSessionId?:string):Promise<Session>
 {
     const session = incomingSessionId ? await s3GetObject(BUCKET_SESSION, incomingSessionId) : new Session();
     if(!session.id) {

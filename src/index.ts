@@ -37,6 +37,11 @@ import {
     sessionIsValid
 } from "./service/Session"
 
+import {
+    loginBegin,
+    loginWaitFinish
+} from "./service/Login"
+
 import {serverInstance} from "./service/ServerInstance";
 import {
     nowSeconds,
@@ -111,5 +116,8 @@ export {Session as Session}
 export {sessionGet as sessionGet}
 export {sessionSave as sessionSave}
 export {sessionIsValid as sessionIsValid}
+
+export {loginBegin as loginBegin}
+export {loginWaitFinish as loginWaitFinish}
 
 
