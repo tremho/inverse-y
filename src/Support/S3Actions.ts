@@ -138,7 +138,7 @@ export function serialize(json:any):string {
 }
 
 /**
- * Deserialize object to json or throw Deserialization exception
+ * Deserialize json to object or throw Deserialization exception
  * @param text
  */
 export function deserialize(text:string):object {
@@ -146,6 +146,7 @@ export function deserialize(text:string):object {
         return JSON.parse(text);
     }
     catch(e) {
+        console.error("Failed to deserialize from this text" +text);
         throw new IOException.DeserializationFailed();
     }
 }
