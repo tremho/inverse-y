@@ -74,23 +74,20 @@ async function wait(ms:number) {
     });
 }
 async function waitforSlotResponse(session:Session):Promise<boolean> {
-    let time = 10000;
-    let running = true;
+
     return new Promise(resolve => {
-        while(running) {
-            // wait for a given amount of time
-            wait(time).then(() => {
-                // then call another function
-                checkSlotForResponse(session).then((result: boolean) => {
-                    if (result) {
-                        running = false;
-                        resolve(true);
-                    }
-                    time /= 2;
-                    if (time < 1000) time = 1000;
-                })
-            })
+        const LoopTillFound:any = async (time: number) => {
+            await wait(time)
+            if (await checkSlotForResponse(session)) {
+                resolve(true);
+            }
+            time /= 2
+            if (time < 500) {
+                throw Error("Timeout");
+            }
+            return LoopTillFound(time)
         }
+        LoopTillFound(10000);
     })
 }
 
