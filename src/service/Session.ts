@@ -25,8 +25,8 @@ export class Session {
     appId: string = ""
     provider: string = ""
     siaToken:string = ""
-    createdAt: Date = new Date()
-    authenticatedAt: Date = new Date(0)
+    createdAt: number = Date.now()
+    authenticatedAt: number = 0;
     app: any = {}
 }
 
@@ -64,10 +64,7 @@ export function sessionIsValid(session:Session):boolean
     const expireMS = 24 * 3600 * 1000; // 24 hours
     var valid = !!session.id;
     valid = valid && !!session.provider
-    console.log(")))))))))))))) Authenticated at "+session.authenticatedAt+" (((((((((((((((")
-    console.log("type = "+(typeof session.authenticatedAt))
-    console.log(new Date(session.authenticatedAt))
-    valid = valid && Date.now() - new Date(session.authenticatedAt).getTime() < expireMS;
+    valid = valid && Date.now() - session.authenticatedAt < expireMS;
 
     return valid
 }
