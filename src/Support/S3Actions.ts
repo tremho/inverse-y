@@ -33,10 +33,6 @@ export async function s3PutText(bucket:string, key:string, text:string)
 
         if (statusCode !== 200) throw new IOException.PutFailed(`s3PutText Failed with statusCode=${statusCode}`)
 
-        console.log("waiting on put object")
-        await waitUntilObjectExists({client:s3Client, maxWaitTime:60, minDelay: 1}, {Bucket:bucket, Key: key})
-        console.log("put object complete")
-
     }
     catch(e:any) {
         Log.Exception(e);
@@ -130,7 +126,10 @@ export async function s3Delete(bucket:string, key:string)
  */
 export function serialize(json:any):string {
     try {
-        return JSON.stringify(json);
+        console.log("serialize: stringify this object ", json)
+        const text = JSON.stringify(json);
+        console.log("serialized to this text: "+text);
+        return text
     }
     catch(e) {
         throw new IOException.SerializationFailed();
@@ -143,6 +142,7 @@ export function serialize(json:any):string {
  */
 export function deserialize(text:string):object {
     try {
+        console.log("deserialize: parsing this text to an object "+text);
         return JSON.parse(text);
     }
     catch(e) {
