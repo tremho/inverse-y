@@ -66,7 +66,8 @@ export function sessionIsValid(session:Session):boolean
     valid = valid && !!session.provider
     console.log(")))))))))))))) Authenticated at "+session.authenticatedAt+" (((((((((((((((")
     console.log("type = "+(typeof session.authenticatedAt))
-    valid = valid && Date.now() - session.authenticatedAt.getTime() < expireMS;
+    console.log(new Date(session.authenticatedAt))
+    valid = valid && Date.now() - new Date(session.authenticatedAt).getTime() < expireMS;
 
     return valid
 }
