@@ -1,6 +1,6 @@
 import {createSiaToken, getSlotData, getSlotIdFromToken, reserveSlotForSIA} from "../Support/SiaToken";
 import http from "http";
-import {Session, sessionGet} from "./Session";
+import {Session, sessionSave} from "./Session";
 
 
 /**
@@ -102,6 +102,7 @@ async function checkSlotForResponse(session:Session):Promise<boolean>
         // set the session as authenticated with the incoming credentials
         // TODO: throw LoginFailed if authorization checks don't jibe.
         session.authenticatedAt = new Date();
+        sessionSave(session);
         return true;
     }
     return false;
