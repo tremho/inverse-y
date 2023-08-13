@@ -74,6 +74,7 @@ export function sessionIsValid(session:Session):boolean
  */
 export async function sessionSave(session:Session)
 {
+    console.log("Saving session", session);
     await s3PutObject(BUCKET_SESSION, session.id, session);
 }
 
