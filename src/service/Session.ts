@@ -49,6 +49,7 @@ export async function sessionGet(incomingSessionId?:string):Promise<Session>
     const session = incomingSessionId ? await s3GetObject(BUCKET_SESSION, incomingSessionId) : new Session();
     if(!session.id) {
         session.id = randomUUID();
+        console.log("Creating new session -- date should be unix 0")
         await sessionSave(session);
     }
     return session
@@ -74,7 +75,6 @@ export function sessionIsValid(session:Session):boolean
  */
 export async function sessionSave(session:Session)
 {
-    console.log("Saving session", session);
     await s3PutObject(BUCKET_SESSION, session.id, session);
 }
 

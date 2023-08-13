@@ -102,6 +102,7 @@ async function checkSlotForResponse(session:Session):Promise<boolean>
         // set the session as authenticated with the incoming credentials
         // TODO: throw LoginFailed if authorization checks don't jibe.
         session.authenticatedAt = new Date(Date.now());
+        console.log("Creating new session -- date should be current", session.authenticatedAt)
         await sessionSave(session);
         return true;
     }
