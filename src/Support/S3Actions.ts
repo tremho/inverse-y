@@ -9,7 +9,8 @@ import {
     S3Client,
     PutObjectCommand,
     GetObjectCommand,
-    DeleteObjectCommand
+    DeleteObjectCommand,
+    waitUntilObjectExists
 } from "@aws-sdk/client-s3";
 
 const REGION = 'us-west-1'; // TODO: ultimately configurable
@@ -31,6 +32,11 @@ export async function s3PutText(bucket:string, key:string, text:string)
         Log.Info('Response code from put command is ' + statusCode);
 
         if (statusCode !== 200) throw new IOException.PutFailed(`s3PutText Failed with statusCode=${statusCode}`)
+
+        console.log("waiting on put object")
+        await waitUntilObjectExists({client:s3Client, maxWaitTime:60, minDelay: 1}, {Bucket:bucket, Key: key})
+        console.log("put object complete")
+
     }
     catch(e:any) {
         Log.Exception(e);
