@@ -9,7 +9,7 @@ import { SignJWT,jwtVerify } from "jose"
 import sha1 from "sha1"
 import {Log} from "../Logging/Logger"
 import {s3PutObject, s3GetObject} from "./S3Actions";
-import {Session} from "../service/Session";
+import {Session, sessionSave} from "../service/Session";
 
 const BUCKET_SIA_SLOTS = 'tremho-services-sia-slots'
 
@@ -149,6 +149,8 @@ export async function reserveSlotForSIA(
     try {
         await s3PutObject(BUCKET_SIA_SLOTS, slotId, data)
         console.log("Slot data put at "+slotId)
+        await sessionSave(session);
+        console.log("Session saved")
     }
     catch(e) {
         Log.Exception(e);
