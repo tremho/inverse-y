@@ -142,6 +142,10 @@ export function serialize(json:any):string {
  */
 export function deserialize(text:string):object {
     try {
+        if(typeof text === "object") {
+            console.log("already deserialized!")
+            return text;
+        }
         console.log("deserialize: parsing this text to an object "+text);
         return JSON.parse(text);
     }
