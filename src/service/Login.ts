@@ -14,7 +14,7 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
 {
     const jwt = await createSiaToken(session.appId);
     session.siaToken = jwt;
-    console.log(">>>>>>>>>>>>>>>>>>>>>>> Reserve slot for SIA with session", session)
+    // console.log(">>>>>>>>>>>>>>>>>>>>>>> Reserve slot for SIA with session", session)
     await reserveSlotForSIA(session, jwt);
     const t = Date.now();
     // http(s)://mydomain:port/
@@ -25,7 +25,7 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
     let hei = invokingUrl.indexOf('/', ptci+3)
     if(hei === -1) hei = invokingUrl.length;
     const host = invokingUrl.substring(0, hei);
-    console.log(">>>>>>>>>>>>>> Invoking login -- see you on the otehr side...")
+    // console.log(">>>>>>>>>>>>>> Invoking login -- see you on the otehr side...")
     const page = await loadAndReturnPageForProvider(host, session.appId, session.provider, jwt);
     return page
 }
@@ -40,10 +40,10 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
  */
 export async function loginWaitFinish(session:Session, incomingSessionId:string):Promise<Session>
 {
-    console.log(">>>>>>>>>>>>> waiting for login to finish")
+    // console.log(">>>>>>>>>>>>> waiting for login to finish")
     // todo: throw LoginFailed on a timeout
     await waitforSlotResponse(session)
-    console.log(">>>>>>>>>>>> updated session", session);
+    // console.log(">>>>>>>>>>>> updated session", session);
     return session; // session should be filled at this point
     // but wait -- what we really need to do is call the invoking url again...
     // I think this is best done via a redirect returned by the sso responder
@@ -76,20 +76,20 @@ async function wait(ms:number) {
 async function waitforSlotResponse(session:Session):Promise<boolean> {
 
     return new Promise(resolve => {
-        console.log(">>>>> starting waitForSlotResponse")
+        // console.log(">>>>> starting waitForSlotResponse")
         const LoopTillFound:any = async (time: number) => {
-            console.log(".... wait", time)
+            // console.log(".... wait", time)
             await wait(time)
-            console.log(".... checking...")
+            // console.log(".... checking...")
             if (await checkSlotForResponse(session)) {
-                console.log("... Found!")
+                // console.log("... Found!")
                 resolve(true);
             }
             time /= 2
             if (time < 500) {
                 throw Error("Timeout");
             }
-            console.log(".... looping")
+            // console.log(".... looping")
             return LoopTillFound(time)
         }
         LoopTillFound(10000);
@@ -99,7 +99,7 @@ async function waitforSlotResponse(session:Session):Promise<boolean> {
 async function checkSlotForResponse(session:Session):Promise<boolean>
 {
     // get slot from sia
-    console.log("->->->->->->-> Checking slot for session", session)
+    // console.log("->->->->->->-> Checking slot for session", session)
     const slotId = await getSlotIdFromToken(session.appId, session.siaToken)
     // open the slot
     const slotData = await getSlotData(slotId)
@@ -109,7 +109,7 @@ async function checkSlotForResponse(session:Session):Promise<boolean>
         // set the session as authenticated with the incoming credentials
         // TODO: throw LoginFailed if authorization checks don't jibe.
         session.authenticatedAt = Date.now();
-        console.log("Creating new session -- date should be current", session.authenticatedAt)
+        // console.log("Creating new session -- date should be current", session.authenticatedAt)
         await sessionSave(session);
         return true;
     }

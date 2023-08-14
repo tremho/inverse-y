@@ -302,14 +302,13 @@ export class LambdaApi<TEvent> {
             // console.log("EntryPoint validation v  is string")
             return ServerError("Parameter validation fails: "+v)
         }
-        console.log("EntryPoint calling  handler")
+
         if(this.handler) {
             try {
                 // console.log("calling handler, expecting promise")
                 // TODO: Validate return
                 return this.handler(event)
             } catch(e:any) {
-                console.log("exception caught", e)
                 Log.Exception(e);
                 return ServerError(e.message);
             }

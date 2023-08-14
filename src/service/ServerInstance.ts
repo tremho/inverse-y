@@ -9,7 +9,7 @@ try {
 } catch (err) {
     console.log('crypto support is disabled!');
 }
-
+import {Log} from "../Logging/Logger"
 import fs from 'fs';
 import path from 'path';
 
@@ -31,11 +31,10 @@ function generateNewInstanceKeys() {
             throw Error('crypto is not supported')
         }
     } catch(e) {
-        console.error('generateNewInstanceKeys', e)
+        Log.Exception(e, 'generateNewInstanceKeys')
         throw e;
     }
 }
-
 // -- ServerInstance id and keys --
 // on each server restart, make a new key.  this will be our serverInstanceID for UUID purposes as well as our validation key.
 // only drawback is that keys issued by our predecessor will no longer be valid, and will reject forcing a retry.

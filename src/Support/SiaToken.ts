@@ -44,7 +44,7 @@ export class SlotData {
 export async function createSiaToken(appId:string):Promise<string> // returns token or ''
 {
     const slotId = `${nowSecondsHex()}-${short.generate()}`;
-    console.log(`SIA-ID`, {slotId});
+    // console.log(`SIA-ID`, {slotId});
 
     const siaToken = new SignJWT({
         "com.tremho.jwt.sia": true,
@@ -63,7 +63,7 @@ export async function createSiaToken(appId:string):Promise<string> // returns to
         return signature
     }).catch(e => {
         // TODO: other such patterns
-        console.error('SIA JWT signing failed', e)
+        Log.Exception(e, 'SIA JWT signing failed')
         return ''
     })
 }
@@ -72,7 +72,7 @@ function createJTI(slotId:string):string {
     try {
         return sha1(serverInstance.id + '\n' + slotId + '\n' + Date.now()).toString();
     } catch(e) {
-        console.error(e)
+        Log.Exception(e);
         return ''
     }
 }
@@ -148,9 +148,9 @@ export async function reserveSlotForSIA(
 
     try {
         await s3PutObject(BUCKET_SIA_SLOTS, slotId, data)
-        console.log("Slot data put at "+slotId)
+        // console.log("Slot data put at "+slotId)
         await sessionSave(session);
-        console.log("Session saved")
+        // console.log("Session saved")
     }
     catch(e) {
         Log.Exception(e);
@@ -161,11 +161,11 @@ export async function reserveSlotForSIA(
 export async function getSlotData(slotId:string):Promise<SlotData>
 {
     try {
-        console.log("retrieving slot data at "+slotId)
+        // console.log("retrieving slot data at "+slotId)
         return  await s3GetObject(BUCKET_SIA_SLOTS, slotId)
     }
     catch(e) {
-        console.error("failed to get slot data at "+slotId)
+        // console.error("failed to get slot data at "+slotId)
         Log.Exception(e);
         throw e
     }

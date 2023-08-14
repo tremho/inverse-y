@@ -126,9 +126,9 @@ export async function s3Delete(bucket:string, key:string)
  */
 export function serialize(json:any):string {
     try {
-        console.log("serialize: stringify this object ", json)
+        // console.log("serialize: stringify this object ", json)
         const text = JSON.stringify(json);
-        console.log("serialized to this text: "+text);
+        // console.log("serialized to this text: "+text);
         return text
     }
     catch(e) {
@@ -143,14 +143,14 @@ export function serialize(json:any):string {
 export function deserialize(text:string):object {
     try {
         if(typeof text === "object") {
-            console.log("already deserialized!")
+            // console.log("already deserialized!")
             return text;
         }
-        console.log("deserialize: parsing this text to an object "+text);
+        // console.log("deserialize: parsing this text to an object "+text);
         return JSON.parse(text);
     }
     catch(e) {
-        console.error("Failed to deserialize from this text" +text);
+        Log.Exception(e, "Failed to deserialize from this text" +text);
         throw new IOException.DeserializationFailed();
     }
 }
