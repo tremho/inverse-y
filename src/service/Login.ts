@@ -40,10 +40,10 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
  */
 export async function loginWaitFinish(session:Session, incomingSessionId:string):Promise<Session>
 {
-    // console.log(">>>>>>>>>>>>> waiting for login to finish")
+    console.log(">>>>>>>>>>>>> waiting for login to finish")
     // todo: throw LoginFailed on a timeout
     await waitforSlotResponse(session)
-    // console.log(">>>>>>>>>>>> updated session", session);
+    console.log(">>>>>>>>>>>> updated session", session);
     return session; // session should be filled at this point
     // but wait -- what we really need to do is call the invoking url again...
     // I think this is best done via a redirect returned by the sso responder
@@ -80,9 +80,9 @@ async function waitforSlotResponse(session:Session):Promise<boolean> {
         const LoopTillFound:any = async (time: number) => {
             // console.log(".... wait", time)
             await wait(time)
-            // console.log(".... checking...")
+            console.log(".... checking...")
             if (await checkSlotForResponse(session)) {
-                // console.log("... Found!")
+                console.log("... Found!")
                 resolve(true);
             }
             time /= 2
