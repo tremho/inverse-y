@@ -38,11 +38,12 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
  * @param session
  * @param incomingSessionId
  */
-export async function loginWaitFinish(session:Session, incomingSessionId:string):Promise<Session>
+export async function loginWaitFinish(session:Session, userToken:string):Promise<Session>
 {
     console.log(">>>>>>>>>>>>> waiting for login to finish")
     // todo: throw LoginFailed on a timeout
     await waitforSlotResponse(session)
+    session.userToken = userToken;
     console.log(">>>>>>>>>>>> updated session", session);
     return session; // session should be filled at this point
     // but wait -- what we really need to do is call the invoking url again...

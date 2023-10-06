@@ -23,6 +23,7 @@ const BUCKET_SESSION = "tremho-services-session"
 export class Session {
     id: string = ""
     appId: string = ""
+    userToken: string = ""
     provider: string = ""
     siaToken:string = ""
     createdAt: number = Date.now()
