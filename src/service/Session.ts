@@ -47,10 +47,11 @@ export class Session {
  */
 export async function sessionGet(incomingSessionId?:string):Promise<Session>
 {
-    const session = incomingSessionId ? await s3GetObject(BUCKET_SESSION, incomingSessionId) : null;
-    if(session && !session.id) {
+    const session = incomingSessionId ? await s3GetObject(BUCKET_SESSION, incomingSessionId) : new Session();
+    if(!session.id) {
         session.id = randomUUID();
-        await sessionSave(session);
+        session.authenticatedAt = 0; // invalid
+        // await sessionSave(session); // don't save an empty session
     }
     return session // if no session matches, we will login to find or create one for user
 }
@@ -61,8 +62,6 @@ export async function sessionGet(incomingSessionId?:string):Promise<Session>
  */
 export function sessionIsValid(session:Session):boolean
 {
-    if(!session) return false;
-
     const expireMS = 24 * 3600 * 1000; // 24 hours
     var valid = !!session.id;
     valid = valid && !!session.provider
