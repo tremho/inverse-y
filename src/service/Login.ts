@@ -100,7 +100,7 @@ async function waitforSlotResponse(session:Session):Promise<boolean> {
 async function checkSlotForResponse(session:Session):Promise<boolean>
 {
     // get slot from sia
-    // console.log("->->->->->->-> Checking slot for session", session)
+    console.log("->->->->->->-> Checking slot for session", session)
     const slotId = await getSlotIdFromToken(session.appId, session.siaToken)
     // open the slot
     const slotData = await getSlotData(slotId)
@@ -110,7 +110,7 @@ async function checkSlotForResponse(session:Session):Promise<boolean>
         // set the session as authenticated with the incoming credentials
         // TODO: throw LoginFailed if authorization checks don't jibe.
         session.authenticatedAt = Date.now();
-        // console.log("Creating new session -- date should be current", session.authenticatedAt)
+        console.log("Creating new session -- date should be current", session.authenticatedAt)
         await sessionSave(session);
         return true;
     }
