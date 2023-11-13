@@ -34,6 +34,7 @@ import {
     Session,
     sessionGet,
     sessionSave,
+    sessionDelete,
     sessionIsValid
 } from "./service/Session"
 
@@ -116,6 +117,7 @@ export {Session as Session}
 export {sessionGet as sessionGet}
 export {sessionSave as sessionSave}
 export {sessionIsValid as sessionIsValid}
+export {sessionDelete as sessionDelete}
 
 export {loginBegin as loginBegin}
 export {loginWaitFinish as loginWaitFinish}

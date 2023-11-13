@@ -79,3 +79,12 @@ export async function sessionSave(session:Session)
     await s3PutObject(BUCKET_SESSION, session.id, session);
 }
 
+/**
+ * Delete the session
+ * @param session
+ */
+export async function sessionDelete(session:Session)
+{
+    await s3Delete(BUCKET_SESSION, session.id)
+}
+
