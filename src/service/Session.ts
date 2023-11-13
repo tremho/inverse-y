@@ -85,6 +85,10 @@ export async function sessionSave(session:Session)
  */
 export async function sessionDelete(sessionId:string)
 {
-    await s3Delete(BUCKET_SESSION, sessionId)
+    try {
+        await s3Delete(BUCKET_SESSION, sessionId)
+    } catch(e:any) {
+        // ignore exception
+    }
 }
 
