@@ -1,6 +1,6 @@
 import {createSiaToken, getSlotData, getSlotIdFromToken, reserveSlotForSIA} from "../Support/SiaToken";
 import http from "http";
-import {Session, sessionSave} from "./Session";
+import {Session, sessionSave, sessionGet} from "./Session";
 
 
 /**
@@ -106,6 +106,7 @@ async function checkSlotForResponse(session:Session):Promise<boolean>
     // open the slot
     const slotData = await getSlotData(slotId)
     console.log(`Slot data from slotId ${slotId}`, slotData);
+    session = await sessionGet(slotData.sessionId); // get the correct session
 
     if(slotData.filledMs > 0)
     {
