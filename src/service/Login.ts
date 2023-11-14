@@ -106,7 +106,6 @@ async function checkSlotForResponse(session:Session):Promise<boolean>
     // open the slot
     const slotData = await getSlotData(slotId)
     console.log(`Slot data from slotId ${slotId}`, slotData);
-    session = await sessionGet(slotData.sessionId); // get the correct session
 
     if(slotData.filledMs > 0)
     {
