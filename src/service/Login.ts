@@ -107,7 +107,7 @@ async function checkSlotForResponse(session:Session):Promise<boolean>
     const slotData = await getSlotData(slotId)
     console.log(`Slot data from slotId ${slotId}`, slotData);
 
-    if(slotData.filledMs > 0)
+    // if(slotData.filledMs == 0)
     {
         // set the session as authenticated with the incoming credentials
         // TODO: throw LoginFailed if authorization checks don't jibe.
