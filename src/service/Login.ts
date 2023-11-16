@@ -69,9 +69,13 @@ async function loadAndReturnPageForProvider(host:string, appId:string, providerI
     })
 }
 
+
+let  waitTimerId:any;
+
 async function wait(ms:number) {
+    clearTimeout(waitTimerId);
     return new Promise(resolve => {
-        setTimeout(resolve, ms);
+        waitTimerId = setTimeout(resolve, ms);
     });
 }
 async function waitforSlotResponse(session:Session):Promise<boolean> {
@@ -82,12 +86,14 @@ async function waitforSlotResponse(session:Session):Promise<boolean> {
             console.log(".... checking...")
             if (await checkSlotForResponse(session)) {
                 console.log("... Found!")
+                clearTimeout(waitTimerId);
                 resolve(true);
             }
             console.log(".... wait", time)
             await wait(time)
             time /= 2
             if (time < 500) {
+                clearTimeout(waitTimerId);
                 throw Error("Timeout");
             }
             console.log(".... looping")
