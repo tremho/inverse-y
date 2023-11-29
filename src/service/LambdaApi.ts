@@ -306,6 +306,7 @@ export class LambdaApi<TEvent> {
         if(this.handler) {
             try {
                 console.log(">> Predicate: Need to adorn event from ", {event, context})
+                event = adornEventFromLambdaRequest(event)
                 console.log("calling handler, expecting promise")
                 // TODO: Validate return
                 return this.handler(event)
@@ -316,4 +317,51 @@ export class LambdaApi<TEvent> {
 
         }
     }
+}
+
+function adornEventFromLambdaRequest(eventIn:any):Event
+{
+    const domainName = "lambda"; // todo - this should be the actual domain name we can use for this
+    if(!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
+    const req = eventIn.requestContext;
+
+    const path = 'http://tbd'+req.resourcePath;
+    let host = req.headers?.origin;
+    if(!host) {
+        host = req.headers?.referer ?? "";
+        let ptci = path.indexOf("://")+3;
+        let ei = path.indexOf("/", ptci);
+        host = ptci > 3 ? path.substring(0, ei) : "";
+    }
+    if(!host) {
+        // todo: http or https?
+        host = "http://"+req.headers?.host ?? "";
+    }
+
+    var cookies:any = {};
+    var cookieString = req.headers?.cookie ?? "";
+    var crumbs = cookieString.split(';')
+    for(let c of crumbs) {
+        const pair:string[] = c.split('=');
+        if(pair.length === 2) cookies[pair[0]] = pair[1]
+    }
+    const eventOut:any = {
+        request: {
+            originalUrl: host + req.originalUrl,
+            headers: req.headers
+        },
+        cookies,
+        query: req.query
+    }
+    /* TODO: Extract path parameters
+    const tparts = template.split('/')
+    const pparts = path.split('/')
+    for(let i=0; i<tparts.length; i++) {
+        const p = tparts[i]
+        if (p.charAt(0) === ':') {
+            eventOut[p.substring(1)] = pparts[i]
+        }
+    }
+    */
+    return eventOut;
 }
