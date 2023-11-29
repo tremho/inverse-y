@@ -307,7 +307,7 @@ export class LambdaApi<TEvent> {
             try {
                 console.log(">> Predicate: Need to adorn event from ", {event, context})
                 let xevent = adornEventFromLambdaRequest(event)
-                console.log("calling handler, expecting promise", {xevent})
+                console.log("calling handler, expecting promise "+JSON.stringify((xevent)))
                 // TODO: Validate return
                 return this.handler(xevent)
             } catch(e:any) {
