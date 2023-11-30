@@ -1,5 +1,6 @@
 
 export enum LogLevel {
+    None,
     Critical,
     Exception,
     Error,
@@ -7,6 +8,6 @@ export enum LogLevel {
     Info,
     Debug,
     Trace,
-    None = 99
+    All = 99
 }
 

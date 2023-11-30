@@ -5,7 +5,7 @@ import {LogLevel} from "./LogLevel";
 import {Clog, formatClogMessage, setClogLevel} from "./Clog";
 
 const logRecord:string[] = []
-let currentLevel = LogLevel.Error;
+let currentLevel = LogLevel.All;
 
 
 /**
