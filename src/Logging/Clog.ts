@@ -2,7 +2,8 @@ import ansiColors from "ansi-colors";
 import {LogLevel} from "./LogLevel"
 
 
-let clogLevel = LogLevel.Error;
+let clogLevel = LogLevel.All;
+const forceInColorTo = false;
 
 export function Clog(level:LogLevel, message:string, ...other:any[]) {
     // if(level >= clogLevel) {
@@ -41,6 +42,7 @@ export function setClogLevel(level:LogLevel) {
 }
 
 export function formatClogMessage(level:LogLevel, message:string, inColor=true) {
+    inColor = forceInColorTo === undefined ? inColor : forceInColorTo;
     // [levl] yyyy-mm-dd hh:mm:ss.sss message text here
     let date = new Date();
     const yr = date.getFullYear()
@@ -62,6 +64,7 @@ export function formatClogMessage(level:LogLevel, message:string, inColor=true) 
     return  `${tag(level, inColor)} ${datestr} ${textColor(level,message,inColor)}`+ inColor ? ansiColors.reset("") : "";
 }
 function tag(level:LogLevel, inColor:boolean) {
+    inColor = forceInColorTo === undefined ? inColor : forceInColorTo;
     switch(level) {
         case LogLevel.Critical:
             return inColor ? ansiColors.bgRed.whiteBright("CRIT") : "CRIT"
@@ -81,6 +84,7 @@ function tag(level:LogLevel, inColor:boolean) {
     }
 }
 function textColor(level:LogLevel, message:string, inColor:boolean) {
+    inColor = forceInColorTo === undefined ? inColor : forceInColorTo;
     if(!inColor) return message;
     switch(level) {
         case LogLevel.Critical:
