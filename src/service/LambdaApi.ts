@@ -326,6 +326,7 @@ function adornEventFromLambdaRequest(eventIn:any):Event
     const req = eventIn.requestContext;
 
     const path = 'http://tbd'+req.resourcePath;
+    console.log(">> path (originalurl) found to be "+path);
     let host = req.headers?.origin;
     if(!host) {
         host = req.headers?.referer ?? "";
@@ -337,6 +338,7 @@ function adornEventFromLambdaRequest(eventIn:any):Event
         // todo: http or https?
         host = "http://"+req.headers?.host ?? "";
     }
+    console.log("host is "+host)
 
     var cookies:any = {};
     var cookieString = req.headers?.cookie ?? "";
@@ -347,7 +349,7 @@ function adornEventFromLambdaRequest(eventIn:any):Event
     }
     const eventOut:any = {
         request: {
-            originalUrl: host + req.originalUrl,
+            originalUrl: host + req.resourcePath,
             headers: req.headers
         },
         cookies,
