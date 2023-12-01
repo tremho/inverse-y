@@ -321,13 +321,14 @@ export class LambdaApi<TEvent> {
 
 function adornEventFromLambdaRequest(eventIn:any):Event
 {
-    const domainName = "lambda"; // todo - this should be the actual domain name we can use for this
     if(!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
     const req = eventIn.requestContext;
 
-    const path = 'http://tbd'+req.resourcePath;
+    const domain = req.domainName;
+
+    const path = domain+req.resourcePath;
     console.log(">> path (originalurl) found to be "+path);
-    let host = req.headers?.origin;
+    let host = req.headers?.origin ?? domain
     if(!host) {
         host = req.headers?.referer ?? "";
         let ptci = path.indexOf("://")+3;
@@ -349,7 +350,7 @@ function adornEventFromLambdaRequest(eventIn:any):Event
     }
     const eventOut:any = {
         request: {
-            originalUrl: host + req.resourcePath,
+            originalUrl: path,
             headers: req.headers
         },
         cookies,
