@@ -26,7 +26,10 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
     if(hei === -1) hei = invokingUrl.length;
     const host = invokingUrl.substring(0, hei);
     // console.log(">>>>>>>>>>>>>> Invoking login -- see you on the otehr side...")
-    const page = await loadAndReturnPageForProvider(host, session.appId, session.provider, jwt);
+    // TODO: Let's create a mapping resource (s3) that pairs host with webhost
+    // for now, we there is only one
+    const webhost = "https://www.tremho.com"
+    const page = await loadAndReturnPageForProvider(webhost, session.appId, session.provider, jwt);
     return page
 }
 
@@ -50,10 +53,10 @@ export async function loginWaitFinish(session:Session, userToken:string):Promise
     // I think this is best done via a redirect returned by the sso responder
 }
 
-async function loadAndReturnPageForProvider(host:string, appId:string, providerId:string, siaToken:string):Promise<string>
+async function loadAndReturnPageForProvider(webhost:string, appId:string, providerId:string, siaToken:string):Promise<string>
 {
     return new Promise(resolve => {
-        http.get(`${host}/sso/${providerId}.html`, res =>{
+        http.get(`${webhost}/sso/${providerId}.html`, res =>{
             if(res.statusCode === 200)
             {
                 let data = '';
