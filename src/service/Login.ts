@@ -55,21 +55,27 @@ export async function loginWaitFinish(session:Session, userToken:string):Promise
 
 async function loadAndReturnPageForProvider(webhost:string, appId:string, providerId:string, siaToken:string):Promise<string>
 {
-    return new Promise(resolve => {
-        http.get(`${webhost}/sso/${providerId}.html`, res =>{
-            if(res.statusCode === 200)
-            {
-                let data = '';
-                res.on('data', chunk => { data += chunk });
-                res.on('close', () => {
-                    resolve(data
-                        .replace("SIA_TOKEN_GOES_HERE", siaToken)
-                        .replace("APPID_GOES_HERE", appId)
-                    );
-                })
-            }
-        })
-    })
+    return returnStaticHtmlForProvider();
+    // return new Promise(resolve => {
+    //     http.get(`${webhost}/sso/${providerId}.html`, res =>{
+    //         if(res.statusCode === 200)
+    //         {
+    //             let data = '';
+    //             res.on('data', chunk => { data += chunk });
+    //             res.on('close', () => {
+    //                 resolve(data
+    //                     .replace("SIA_TOKEN_GOES_HERE", siaToken)
+    //                     .replace("APPID_GOES_HERE", appId)
+    //                 );
+    //             })
+    //         }
+    //     })
+    // })
+}
+
+async function returnStaticHtmlForProvider():Promise<string>
+{
+    return Promise.resolve("<html><head><title>Temp Test Content</title></head><body><h3>Hello, World</h3></body></html>");
 }
 
 
