@@ -380,7 +380,7 @@ function adornEventFromLambdaRequest(eventIn:any):Event
     for(let p of Object.getOwnPropertyNames(req.parameters??{})) {
         parameters[p] = new ParamValue(req.parameters[p])
     }
-    for(let p of Object.getOwnPropertyNames(req.query)) {
+    for(let p of Object.getOwnPropertyNames(req.query??{})) {
         parameters[p] = new ParamValue(req.query[p])
     }
 
