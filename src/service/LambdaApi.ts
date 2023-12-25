@@ -310,8 +310,10 @@ export class LambdaApi<TEvent> {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
                 let xevent = adornEventFromLambdaRequest(event)
                 console.log("calling handler, expecting promise "+JSON.stringify((xevent)))
+                const resp = this.handler(xevent)
                 // TODO: Validate return
-                return this.handler(xevent)
+                console.log(">>> Response ", resp);
+                return resp;
             } catch(e:any) {
                 Log.Exception(e);
                 return ServerError(e.message);
