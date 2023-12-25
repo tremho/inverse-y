@@ -351,10 +351,7 @@ function adornEventFromLambdaRequest(eventIn:any):Event
     }
     // todo: this just grabs parameters from a "function request" and not from a templated path or query values
     // need the template here somehow in aws context.  This is otherwise done in express.
-    const parameters:any = {}
-    for(let p of Object.getOwnPropertyNames(req.parameters??{})) {
-        parameters[p] = req.parameters[p]
-    }
+    const parameters:any = eventIn.parameters ?? {}
 
     const eventOut:any = {
         request: {
