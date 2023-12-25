@@ -3,6 +3,34 @@ import {ServerError, Success} from "./Responses";
 import {Log} from "../Logging/Logger"
 export {RequestEvent as RequestEvent}
 
+export class ParamValue
+{
+    _value:string
+
+    constructor(value:string) {
+        this._value = value;
+    }
+
+    public set value(value:string) {
+        this._value = value;
+    }
+
+    public get number():number {
+        return Number(this._value)
+    }
+    public get int():number {
+        return Math.round(this.number);
+    }
+    public get string():string {
+        return this._value;
+    }
+    public get bool():boolean {
+        const truths = ["true", "yes", "t", "y", "1"]
+        var pos = this._value.trim().toLowerCase()
+        return truths.indexOf(pos) !== -1;
+    }
+}
+
 /**
  * Defines the declaration of a parameter
  * including some optional constraints (min, max, oneOf, match) and an optional default value
@@ -348,13 +376,21 @@ function adornEventFromLambdaRequest(eventIn:any):Event
         const pair:string[] = c.split('=');
         if(pair.length === 2) cookies[pair[0]] = pair[1]
     }
+    const parameters:any = {}
+    for(let p of Object.getOwnPropertyNames(req.parameters??{})) {
+        parameters[p] = new ParamValue(req.parameters[p])
+    }
+    for(let p of Object.getOwnPropertyNames(req.query)) {
+        parameters[p] = new ParamValue(req.query[p])
+    }
+
     const eventOut:any = {
         request: {
             originalUrl: path,
             headers: req.headers
         },
         cookies,
-        query: req.query
+        parameters
     }
     /* TODO: Extract path parameters
     const tparts = template.split('/')
