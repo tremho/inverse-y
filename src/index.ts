@@ -5,8 +5,7 @@ import {
     ParamSet,
     ReturnDef,
     RequestEvent,
-    ServiceDefinition,
-    ParamValue
+    ServiceDefinition
 }
  from './service/LambdaApi'
 
@@ -77,7 +76,6 @@ export {ParamSet as ParamSet}
 export {ReturnDef as ReturnDef}
 export {RequestEvent as RequestEvent}
 export {ServiceDefinition as ServiceDefinition}
-export {ParamValue as ParamValue}
 
 export {Success as Success}
 export {BadRequest as BadRequest}
