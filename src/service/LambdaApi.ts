@@ -374,7 +374,12 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             Log.Debug("values:", {pn, value:parameters[pn]})
         }
     }
-    Log.Debug("TODO: attach incoming query parameters", eventIn.queryStringParameters, eventIn.rawQueryString)
+    Log.Debug("TODO: attach incoming query parameters")
+    Log.Debug("queryStringParameters type = "+(typeof eventIn.queryStringParameters))
+    Log.Debug("queryStringParameters value = "+eventIn.queryStringParameters)
+    Log.Debug("queryStringParameters type = "+(typeof eventIn.rawQueryString))
+    Log.Debug("queryStringParameters value = "+eventIn.rawQueryString)
+
 
     const eventOut:any = {
         request: {
