@@ -371,9 +371,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             parameters[pn] = (pslots[i]??"").trim();
         }
     }
-    for(let p of Object.getOwnPropertyNames(req.query)) {
-        parameters[p] = req.query[p]
-    }
+    Log.Debug("TODO: attach incoming query parameters")
 
     const eventOut:any = {
         request: {
