@@ -367,8 +367,10 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
     for(let i = 0; i< tslots.length; i++) {
         const brknm = (tslots[i]??"").trim();
         if(brknm.charAt(0) === '{') {
+            Log.Debug("brknm", brknm)
             const pn = brknm.substring(1, brknm.length - 1);
             parameters[pn] = (pslots[i]??"").trim();
+            Log.Debug("values:", {pn, value:parameters[pn]})
         }
     }
     Log.Debug("TODO: attach incoming query parameters")
