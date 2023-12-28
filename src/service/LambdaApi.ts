@@ -369,7 +369,7 @@ function adornEventFromLambdaRequest(eventIn:any):Event
 
 function AwsStyleResponse(resp:any):any
 {
-    const aws:any = { }
+    const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
     if(typeof resp != "object") {
         resp = {
             statusCode: 200,
