@@ -313,7 +313,7 @@ export class LambdaApi<TEvent> {
             try {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
                 // console.log(">>> Incoming event: "+JSON.stringify(event, null, 2))
-                let xevent = adornEventFromLambdaRequest(event)
+                let xevent = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
                 console.log(">>> calling the handler, expecting promise "+JSON.stringify(xevent, null, 2))
                 const resp = AwsStyleResponse(await this.handler(xevent));
                 console.log(">>> Response "+JSON.stringify(resp, null, 2));
@@ -327,7 +327,7 @@ export class LambdaApi<TEvent> {
     }
 }
 
-function adornEventFromLambdaRequest(eventIn:any):Event
+function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 {
     console.log("entering adornEventFromLambdaRequest")
     if(!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
@@ -359,12 +359,21 @@ function adornEventFromLambdaRequest(eventIn:any):Event
         const pair:string[] = c.split('=');
         if(pair.length === 2) cookies[pair[0]] = pair[1]
     }
-    // todo: this just grabs parameters from a "function request" and not from a templated path or query values
-    // need the template here somehow in aws context.  This is otherwise done in express.
-    console.log("At the todo point where we would collect parameters based on template")
-    const parameters:any = eventIn.parameters ?? {}
-    console.log("Forcing it as a proof...")
-    parameters.name = "TODO Forced";
+    const parameters:any = {}
+    const tslots = template.split('/');
+    const pslots = path.split('/');
+    Log.Info("tslots", tslots);
+    Log.Info("pslots", pslots);
+    for(let i = 0; i< tslots.length; i++) {
+        const brknm = tslots[i].trim();
+        if(brknm.charAt(0) === '{') {
+            const pn = brknm.substring(1, brknm.length - 1);
+            parameters[pn] = pslots[i].trim();
+        }
+    }
+    for(let p of Object.getOwnPropertyNames(req.query)) {
+        parameters[p] = req.query[p]
+    }
 
     const eventOut:any = {
         request: {
