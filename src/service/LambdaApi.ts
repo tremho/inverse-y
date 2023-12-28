@@ -360,15 +360,15 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         if(pair.length === 2) cookies[pair[0]] = pair[1]
     }
     const parameters:any = {}
-    const tslots = template.split('/');
+    const tslots = template.split('/').slice(1);
     const pslots = path.split('/').slice(3);
     Log.Info("tslots", tslots);
     Log.Info("pslots", pslots);
     for(let i = 0; i< tslots.length; i++) {
-        const brknm = tslots[i].trim();
+        const brknm = (tslots[i]??"").trim();
         if(brknm.charAt(0) === '{') {
             const pn = brknm.substring(1, brknm.length - 1);
-            parameters[pn] = pslots[i].trim();
+            parameters[pn] = (pslots[i]??"").trim();
         }
     }
     for(let p of Object.getOwnPropertyNames(req.query)) {
