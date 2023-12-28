@@ -17,7 +17,8 @@ export function ClogCritical(message:string, ...other:any[]) {
     Clog(LogLevel.Critical, message, other)
 }
 export function ClogException(e:Error, ...other:any[]) {
-    const message = e.message
+    let message = e.message
+    if(e.stack) message += " @ " + e.stack;
     other.unshift(e);
     Clog(LogLevel.Exception, message, other);
 }
