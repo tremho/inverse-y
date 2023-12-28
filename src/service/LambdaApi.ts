@@ -371,6 +371,7 @@ function AwsStyleResponse(resp:any):any
 {
     const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
     if(typeof resp != "object") {
+        Log.Debug(`resp is type ${ typeof resp }`)
         resp = {
             statusCode: 200,
             body: ""+resp,
@@ -423,6 +424,7 @@ function AwsStyleResponse(resp:any):any
         aws.isBase64Encoded = false;
         if(resp) aws.body = resp.body ?? resp.result
 
+        Log.Info("AWS response ", aws);
         return aws;
     }
 }
