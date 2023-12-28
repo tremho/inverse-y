@@ -310,8 +310,7 @@ export class LambdaApi<TEvent> {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
                 let xevent = adornEventFromLambdaRequest(event)
                 console.log("calling handler, expecting promise "+JSON.stringify((xevent)))
-                const resp = this.handler(xevent)
-                // TODO: Validate return
+                const resp = AwsStyleResponse(this.handler(xevent))
                 console.log(">>> Response ", resp);
                 return resp;
             } catch(e:any) {
@@ -365,4 +364,39 @@ function adornEventFromLambdaRequest(eventIn:any):Event
         parameters
     }
     return eventOut;
+}
+
+function AwsStyleResponse(resp:any):any
+{
+    const aws:any = { statusCode: 500, body: "{\"error\": \"No Response\" }", headers:{"content-type": "application/json"} }
+    if(resp) {
+        if (resp.cookies !== undefined) {
+            var cookies: any = []
+            var age = resp.cookies.expireSeconds ?? 60; // 1 minute
+            delete resp.expireSeconds;
+            Object.getOwnPropertyNames(resp.cookies).forEach(name => {
+                var value = resp.cookies[name];
+                cookies.push(`${name}=${value}; Max-Age=${age}; `);
+            })
+            aws.headers["set-cookie"] = cookies
+            delete resp.cookies;
+        }
+        if (resp.headers !== undefined) {
+
+            for (var hdr of Object.getOwnPropertyNames(resp.headers)) {
+                aws.headers[hdr] = resp.headers[hdr]
+            }
+            delete resp.headers;
+        }
+        if (resp.statusCode !== undefined) {
+            aws.statusCode = resp.statusCode;
+            delete resp.statusCode
+        }
+
+        if (resp.contentType !== undefined) {
+            aws.headers["content-type"] = resp.contentType
+            delete resp.contentType
+        }
+        aws.body = resp.body ?? resp.result;
+    }
 }
