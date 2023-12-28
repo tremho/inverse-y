@@ -325,8 +325,11 @@ export class LambdaApi<TEvent> {
 
 function adornEventFromLambdaRequest(eventIn:any):Event
 {
+    console.log("entering adornEventFromLambdaRequest")
     if(!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
     const req = eventIn.requestContext;
+
+    console.log("continuing adorn with req", req)
 
     const domain = req.domainName;
 
@@ -354,7 +357,10 @@ function adornEventFromLambdaRequest(eventIn:any):Event
     }
     // todo: this just grabs parameters from a "function request" and not from a templated path or query values
     // need the template here somehow in aws context.  This is otherwise done in express.
+    console.log("At the todo point where we would collect parameters based on template")
     const parameters:any = eventIn.parameters ?? {}
+    console.log("Forcing it as a proof...")
+    parameters.name = "TODO Forced";
 
     const eventOut:any = {
         request: {
@@ -371,7 +377,7 @@ function AwsStyleResponse(resp:any):any
 {
     const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
     if(typeof resp != "object") {
-        Log.Debug(`resp is type ${ typeof resp }`)
+        console.log(`resp is type ${ typeof resp }`)
         resp = {
             statusCode: 200,
             body: ""+resp,
@@ -424,7 +430,7 @@ function AwsStyleResponse(resp:any):any
         aws.isBase64Encoded = false;
         if(resp) aws.body = resp.body ?? resp.result
 
-        Log.Info("AWS response ", aws);
+        console.log("AWS response ", aws);
         return aws;
     }
 }
