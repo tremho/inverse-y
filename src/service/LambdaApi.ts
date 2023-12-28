@@ -306,16 +306,15 @@ export class LambdaApi<TEvent> {
 
         */
 
-        Log.Info("Service Definition", this.definition);
-        console.log("logged service definition ", this.definition);
+        // Log.Info("Service Definition", this.definition);
 
         if(this.handler) {
             try {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
                 let xevent = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
-                console.log(">>> calling the handler, expecting promise "+JSON.stringify(xevent, null, 2))
+                // console.log(">>> calling the handler, expecting promise "+JSON.stringify(xevent, null, 2))
                 const resp = AwsStyleResponse(await this.handler(xevent));
-                console.log(">>> Response "+JSON.stringify(resp, null, 2));
+                // console.log(">>> Response "+JSON.stringify(resp, null, 2));
                 return resp;
             } catch(e:any) {
                 Log.Exception(e);
@@ -328,18 +327,18 @@ export class LambdaApi<TEvent> {
 
 function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 {
-    console.log("entering adornEventFromLambdaRequest")
+    // console.log("entering adornEventFromLambdaRequest")
     if(!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
     const req = eventIn.requestContext;
 
-    console.log("continuing adorn with req", req)
+    // console.log("continuing adorn with req", req)
 
     const domain = req.domainName;
 
     const pathLessStage = req.path.substring(req.stage.length+1)
     Log.Debug(`path values`, {path:req.path, stage: req.stage, pathLessStage})
     const path = "https://"+domain+pathLessStage
-    console.log(">> path (originalurl) found to be "+path);
+    // console.log(">> path (originalurl) found to be "+path);
     let host = req.headers?.origin ?? domain
     if(!host) {
         host = req.headers?.referer ?? "";
@@ -351,7 +350,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         // todo: http or https?
         host = "http://"+req.headers?.host ?? "";
     }
-    console.log("host is "+host)
+    // console.log("host is "+host)
 
     var cookies:any = {};
     var cookieString = req.headers?.cookie ?? "";
@@ -363,8 +362,8 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
     const parameters:any = {}
     const tslots = template.split('/').slice(1);
     const pslots = path.split('/').slice(3);
-    Log.Info("tslots", tslots);
-    Log.Info("pslots", pslots);
+    // Log.Info("tslots", tslots);
+    // Log.Info("pslots", pslots);
     for(let i = 0; i< tslots.length; i++) {
         const brknm = (tslots[i]??"").trim();
         if(brknm.charAt(0) === '{') {
@@ -374,10 +373,6 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             Log.Debug("values:", {pn, value:parameters[pn]})
         }
     }
-    Log.Debug("TODO: attach incoming query parameters")
-    Log.Debug("queryStringParameters type = "+(typeof eventIn.queryStringParameters), eventIn.queryStringParameters)
-    Log.Debug("rawQueryString type = "+(typeof eventIn.rawQueryString), eventIn.rawQueryString)
-
     if(typeof eventIn.queryStringParameters === "object") {
         for(let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
             parameters[p] = eventIn.queryStringParameters[p]
@@ -399,7 +394,7 @@ function AwsStyleResponse(resp:any):any
 {
     const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
     if(typeof resp != "object") {
-        console.log(`resp is type ${ typeof resp }`)
+        // console.log(`resp is type ${ typeof resp }`)
         resp = {
             statusCode: 200,
             body: ""+resp,
@@ -452,7 +447,8 @@ function AwsStyleResponse(resp:any):any
         aws.isBase64Encoded = false;
         if(resp) aws.body = resp.body ?? resp.result
 
-        console.log("AWS response ", aws);
+        // console.log("AWS response ", aws);
+        throw Error("Just to test the logging")
         return aws;
     }
 }
