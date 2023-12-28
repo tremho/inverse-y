@@ -309,7 +309,7 @@ export class LambdaApi<TEvent> {
         if(this.handler) {
             try {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
-                console.log(">>> Incoming event: "+JSON.stringify(event, null, 2))
+                // console.log(">>> Incoming event: "+JSON.stringify(event, null, 2))
                 let xevent = adornEventFromLambdaRequest(event)
                 console.log("calling the handler, expecting promise "+JSON.stringify(xevent, null, 2))
                 const resp = AwsStyleResponse(await this.handler(xevent));
