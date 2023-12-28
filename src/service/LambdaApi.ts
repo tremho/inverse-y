@@ -278,7 +278,9 @@ export class LambdaApi<TEvent> {
         return pset
     }
 
-    entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
+    async entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
+
+        /* Remove this code - it does nothing...
 
         // start with fixup of event being passed in as string
         if(typeof event === 'string') event = JSON.parse(event);
@@ -288,13 +290,11 @@ export class LambdaApi<TEvent> {
         // console.log("callback", callback);
         if((event as RequestEvent).version) {
             throw Error("Found a case of RequestEvent -- Don't remove that code after all!!");
-            /*
-            if(typeof this.definition.onRequest === 'function') {
-                this.definition.onRequest(event as RequestEvent);
-            }
-            // assume this is a request. our event payload is in the body
-            event = (event as RequestEvent).body;
-             */
+            // if(typeof this.definition.onRequest === 'function') {
+            //     this.definition.onRequest(event as RequestEvent);
+            // }
+            // // assume this is a request. our event payload is in the body
+            // event = (event as RequestEvent).body;
         }
         // console.log("EntryPoint validation")
         const v = this.validate((event as TEvent))
@@ -304,13 +304,14 @@ export class LambdaApi<TEvent> {
             return ServerError("Parameter validation fails: "+v)
         }
 
+        */
+
         if(this.handler) {
             try {
-                // console.log(">> Predicate: Need to adorn event from ", {event, context})
                 if(!(event as any).requestContext) (event as any).requestContext = {};
                 let xevent = adornEventFromLambdaRequest(event)
-                console.log("calling handler, expecting promise "+JSON.stringify((xevent)))
-                const resp = AwsStyleResponse(this.handler(xevent));
+                console.log("calling handler, expecting promise "+JSON.stringify(xevent, null, 2))
+                const resp = AwsStyleResponse(await this.handler(xevent));
                 console.log(">>> Response ", resp);
                 return resp;
             } catch(e:any) {
