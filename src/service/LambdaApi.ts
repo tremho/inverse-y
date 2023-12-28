@@ -398,5 +398,6 @@ function AwsStyleResponse(resp:any):any
             delete resp.contentType
         }
         aws.body = resp.body ?? resp.result;
+        return aws;
     }
 }
