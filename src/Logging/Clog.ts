@@ -61,7 +61,7 @@ export function formatClogMessage(level:LogLevel, message:string, inColor=true) 
     let datestr = `${yr}-${mo}-${dy} ${hr}:${mn}:${sec}.${ms}`;
     if (inColor) datestr = ansiColors.gray(datestr);
 
-    return  `${tag(level, inColor)} ${datestr} ${textColor(level,message,inColor)}`+ inColor ? ansiColors.reset("") : "";
+    return  (`${tag(level, inColor)} ${datestr} ${textColor(level,message,inColor)}`)+ (inColor ? ansiColors.reset("") : "");
 }
 function tag(level:LogLevel, inColor:boolean) {
     inColor = forceInColorTo === undefined ? inColor : forceInColorTo;

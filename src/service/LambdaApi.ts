@@ -361,7 +361,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
     }
     const parameters:any = {}
     const tslots = template.split('/');
-    const pslots = path.split('/');
+    const pslots = path.split('/').slice(3);
     Log.Info("tslots", tslots);
     Log.Info("pslots", pslots);
     for(let i = 0; i< tslots.length; i++) {
