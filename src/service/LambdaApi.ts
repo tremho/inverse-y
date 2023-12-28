@@ -312,7 +312,6 @@ export class LambdaApi<TEvent> {
         if(this.handler) {
             try {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
-                // console.log(">>> Incoming event: "+JSON.stringify(event, null, 2))
                 let xevent = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
                 console.log(">>> calling the handler, expecting promise "+JSON.stringify(xevent, null, 2))
                 const resp = AwsStyleResponse(await this.handler(xevent));
@@ -375,7 +374,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             Log.Debug("values:", {pn, value:parameters[pn]})
         }
     }
-    Log.Debug("TODO: attach incoming query parameters")
+    Log.Debug("TODO: attach incoming query parameters", eventIn.queryStringParameters, eventIn.rawQueryString)
 
     const eventOut:any = {
         request: {
