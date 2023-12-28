@@ -448,7 +448,12 @@ function AwsStyleResponse(resp:any):any
         if(resp) aws.body = resp.body ?? resp.result
 
         // console.log("AWS response ", aws);
-        throw Error("Just to test the logging")
+        try {
+            throw Error("Just to test the logging")
+        } catch(e:any) {
+            Log.Exception(e);
+            throw e;
+        }
         return aws;
     }
 }
