@@ -416,7 +416,7 @@ function AwsStyleResponse(resp:any):any
             }
         }
 
-        if (resp.contentType !== undefined) {
+        if (aws.headers && resp.contentType !== undefined) {
             aws.headers["content-type"] = resp.contentType
             delete resp.contentType
         }
