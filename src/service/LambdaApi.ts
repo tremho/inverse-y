@@ -415,7 +415,7 @@ function AwsStyleResponse(resp:any):any
                 resp.contentType = "application/json"
             }
             catch(e:any) {
-                if( body.indexOf("<html>") ) {
+                if( body.indexOf("<html>") !== -1) {
                     resp.contentType = "text/html"
                 }
                 else {
