@@ -369,7 +369,13 @@ function adornEventFromLambdaRequest(eventIn:any):Event
 
 function AwsStyleResponse(resp:any):any
 {
-    const aws:any = { statusCode: 500, body: "Error: No Response Provided!", headers:{"content-type": "text/plain"} }
+    const aws:any = { }
+    if(typeof resp != "object") {
+        resp = {
+            statusCode: 200,
+            body: ""+resp,
+        }
+    }
     if(resp) {
         if (resp.cookies !== undefined) {
             var cookies: any = []
