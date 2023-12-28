@@ -369,7 +369,7 @@ function adornEventFromLambdaRequest(eventIn:any):Event
 
 function AwsStyleResponse(resp:any):any
 {
-    const aws:any = { statusCode: 500, body: "{\"error\": \"No Response\" }", headers:{"content-type": "application/json"} }
+    const aws:any = { statusCode: 500, body: "Error: No Response Provided!", headers:{"content-type": "text/plain"} }
     if(resp) {
         if (resp.cookies !== undefined) {
             var cookies: any = []
@@ -393,6 +393,21 @@ function AwsStyleResponse(resp:any):any
         if (resp.statusCode !== undefined) {
             aws.statusCode = resp.statusCode;
             delete resp.statusCode
+        }
+        if(!resp.contentType) {
+            const body = resp.body ?? resp.result ?? "";
+            try {
+                JSON.parse(body);
+                resp.contentType = "application/json"
+            }
+            catch(e:any) {
+                if( body.indexOf("<html>") ) {
+                    resp.contentType = "text/html"
+                }
+                else {
+                    resp.contentType = "text/plain"
+                }
+            }
         }
 
         if (resp.contentType !== undefined) {
