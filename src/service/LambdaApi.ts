@@ -375,11 +375,14 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         }
     }
     Log.Debug("TODO: attach incoming query parameters")
-    Log.Debug("queryStringParameters type = "+(typeof eventIn.queryStringParameters))
-    Log.Debug("queryStringParameters value = "+eventIn.queryStringParameters)
-    Log.Debug("queryStringParameters type = "+(typeof eventIn.rawQueryString))
-    Log.Debug("queryStringParameters value = "+eventIn.rawQueryString)
+    Log.Debug("queryStringParameters type = "+(typeof eventIn.queryStringParameters), eventIn.queryStringParameters)
+    Log.Debug("rawQueryString type = "+(typeof eventIn.rawQueryString), eventIn.rawQueryString)
 
+    if(typeof eventIn.queryStringParameters === "object") {
+        for(let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
+            parameters[p] = eventIn.queryStringParameters[p]
+        }
+    }
 
     const eventOut:any = {
         request: {
