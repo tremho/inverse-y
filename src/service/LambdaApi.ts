@@ -310,7 +310,7 @@ export class LambdaApi<TEvent> {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
                 let xevent = adornEventFromLambdaRequest(event)
                 console.log("calling handler, expecting promise "+JSON.stringify((xevent)))
-                const resp = AwsStyleResponse(this.handler(xevent))
+                const resp = this.handler(xevent);
                 console.log(">>> Response ", resp);
                 return resp;
             } catch(e:any) {
@@ -378,7 +378,8 @@ function AwsStyleResponse(resp:any):any
                 var value = resp.cookies[name];
                 cookies.push(`${name}=${value}; Max-Age=${age}; `);
             })
-            aws.headers["set-cookie"] = cookies
+            // aws.headers["set-cookie"] = cookies
+            aws.cookies = cookies;
             delete resp.cookies;
         }
         if (resp.headers !== undefined) {
@@ -398,6 +399,8 @@ function AwsStyleResponse(resp:any):any
             delete resp.contentType
         }
         aws.body = resp.body ?? resp.result;
+        aws.isBase64Encoded = false;
+
         return aws;
     }
 }
