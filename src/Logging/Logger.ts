@@ -23,8 +23,9 @@ export function LogAtLevel(level:any, message:string, ...other:any[]) {
             outline += " - " + logRecord.push(JSON.stringify(others))
         }
         logRecord.push(outline);
+        console.log(outline);
     }
-    Clog(level, message, other);
+    // Clog(level, message, other);
 }
 
 /**
