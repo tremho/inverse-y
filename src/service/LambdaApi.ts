@@ -374,7 +374,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
                 Log.Debug("values:", {pn, value: parameters[pn]})
             }
         }
-        if (typeof eventIn.queryStringParameters === "object") {
+        if (eventIn.queryStringPrarmeters && typeof eventIn.queryStringParameters === "object") {
             for (let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
                 parameters[p] = eventIn.queryStringParameters[p]
             }
@@ -391,9 +391,8 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         return eventOut;
     }
     catch(e:any) {
-        console.log("Logging an exception here")
         Log.Exception(e);
-        console.log("now continuing....")
+        throw e;
     }
 }
 
