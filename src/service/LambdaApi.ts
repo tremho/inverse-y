@@ -447,7 +447,7 @@ function AwsStyleResponse(resp:any):any
             }
         }
 
-        if (aws.headers && resp.contentType !== undefined) {
+        if (resp.contentType !== undefined) {
             aws.headers["content-type"] = resp.contentType
             delete resp.contentType
         }
@@ -455,12 +455,6 @@ function AwsStyleResponse(resp:any):any
         if(resp) aws.body = resp.body ?? resp.result
 
         // console.log("AWS response ", aws);
-        try {
-            throw Error("Just to test the logging")
-        } catch(e:any) {
-            Log.Exception(e);
-            throw e;
-        }
         return aws;
     }
 }

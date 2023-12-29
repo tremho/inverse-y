@@ -77,7 +77,8 @@ export class Log {
         LogAtLevel(LogLevel.Trace, message, other)
     }
     static Exception(e:any, ...other:any[]) {
-        console.log("Logger Exception", e)
-        LogAtLevel(LogLevel.Exception, e.message, other)
+        let message = e.message
+        if(e.stack) message += " @ " + e.stack;
+        LogAtLevel(LogLevel.Exception, message, other)
     }
 }
