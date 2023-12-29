@@ -360,7 +360,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             const pair: string[] = c.split('=');
             if (pair.length === 2) cookies[pair[0]] = pair[1]
         }
-        const parameters: any = {}
+        const parameters: any = eventIn.parameters ?? {}
         const tslots = template.split('/').slice(1);
         const pslots = path.split('/').slice(3);
         // Log.Info("tslots", tslots);
@@ -370,8 +370,10 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             if (brknm.charAt(0) === '{') {
                 Log.Debug("brknm", brknm)
                 const pn = brknm.substring(1, brknm.length - 1);
-                parameters[pn] = (pslots[i] ?? "").trim();
-                Log.Debug("values:", {pn, value: parameters[pn]})
+                if(parameters[pn] === undefined) {
+                    parameters[pn] = (pslots[i] ?? "").trim();
+                    Log.Debug("values:", {pn, value: parameters[pn]})
+                }
             }
         }
         Log.Debug("queryStringParameters", eventIn.queryStringParameters);
