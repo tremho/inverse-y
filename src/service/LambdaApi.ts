@@ -374,6 +374,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
                 Log.Debug("values:", {pn, value: parameters[pn]})
             }
         }
+        Log.Debug("queryStringParameters", eventIn.queryStringParameters);
         if (eventIn.queryStringPrarmeters && typeof eventIn.queryStringParameters === "object") {
             for (let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
                 parameters[p] = eventIn.queryStringParameters[p]
