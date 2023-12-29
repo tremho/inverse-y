@@ -328,66 +328,73 @@ export class LambdaApi<TEvent> {
 function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 {
     // console.log("entering adornEventFromLambdaRequest")
-    if(!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
-    const req = eventIn.requestContext;
+    try {
+        if (!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
+        const req = eventIn.requestContext;
 
-    // console.log("continuing adorn with req", req)
+        // console.log("continuing adorn with req", req)
 
-    const domain = req.domainName;
+        const domain = req.domainName;
 
-    const pathLessStage = req.path.substring(req.stage.length+1)
-    Log.Debug(`path values`, {path:req.path, stage: req.stage, pathLessStage})
-    const path = "https://"+domain+pathLessStage
-    // console.log(">> path (originalurl) found to be "+path);
-    let host = req.headers?.origin ?? domain
-    if(!host) {
-        host = req.headers?.referer ?? "";
-        let ptci = path.indexOf("://")+3;
-        let ei = path.indexOf("/", ptci);
-        host = ptci > 3 ? path.substring(0, ei) : "";
-    }
-    if(!host) {
-        // todo: http or https?
-        host = "http://"+req.headers?.host ?? "";
-    }
-    // console.log("host is "+host)
-
-    var cookies:any = {};
-    var cookieString = req.headers?.cookie ?? "";
-    var crumbs = cookieString.split(';')
-    for(let c of crumbs) {
-        const pair:string[] = c.split('=');
-        if(pair.length === 2) cookies[pair[0]] = pair[1]
-    }
-    const parameters:any = {}
-    const tslots = template.split('/').slice(1);
-    const pslots = path.split('/').slice(3);
-    // Log.Info("tslots", tslots);
-    // Log.Info("pslots", pslots);
-    for(let i = 0; i< tslots.length; i++) {
-        const brknm = (tslots[i]??"").trim();
-        if(brknm.charAt(0) === '{') {
-            Log.Debug("brknm", brknm)
-            const pn = brknm.substring(1, brknm.length - 1);
-            parameters[pn] = (pslots[i]??"").trim();
-            Log.Debug("values:", {pn, value:parameters[pn]})
+        const pathLessStage = req.path.substring(req.stage.length + 1)
+        Log.Debug(`path values`, {path: req.path, stage: req.stage, pathLessStage})
+        const path = "https://" + domain + pathLessStage
+        // console.log(">> path (originalurl) found to be "+path);
+        let host = req.headers?.origin ?? domain
+        if (!host) {
+            host = req.headers?.referer ?? "";
+            let ptci = path.indexOf("://") + 3;
+            let ei = path.indexOf("/", ptci);
+            host = ptci > 3 ? path.substring(0, ei) : "";
         }
-    }
-    if(typeof eventIn.queryStringParameters === "object") {
-        for(let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
-            parameters[p] = eventIn.queryStringParameters[p]
+        if (!host) {
+            // todo: http or https?
+            host = "http://" + req.headers?.host ?? "";
         }
-    }
+        // console.log("host is "+host)
 
-    const eventOut:any = {
-        request: {
-            originalUrl: path,
-            headers: req.headers
-        },
-        cookies,
-        parameters
+        var cookies: any = {};
+        var cookieString = req.headers?.cookie ?? "";
+        var crumbs = cookieString.split(';')
+        for (let c of crumbs) {
+            const pair: string[] = c.split('=');
+            if (pair.length === 2) cookies[pair[0]] = pair[1]
+        }
+        const parameters: any = {}
+        const tslots = template.split('/').slice(1);
+        const pslots = path.split('/').slice(3);
+        // Log.Info("tslots", tslots);
+        // Log.Info("pslots", pslots);
+        for (let i = 0; i < tslots.length; i++) {
+            const brknm = (tslots[i] ?? "").trim();
+            if (brknm.charAt(0) === '{') {
+                Log.Debug("brknm", brknm)
+                const pn = brknm.substring(1, brknm.length - 1);
+                parameters[pn] = (pslots[i] ?? "").trim();
+                Log.Debug("values:", {pn, value: parameters[pn]})
+            }
+        }
+        if (typeof eventIn.queryStringParameters === "object") {
+            for (let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
+                parameters[p] = eventIn.queryStringParameters[p]
+            }
+        }
+
+        const eventOut: any = {
+            request: {
+                originalUrl: path,
+                headers: req.headers
+            },
+            cookies,
+            parameters
+        }
+        return eventOut;
     }
-    return eventOut;
+    catch(e:any) {
+        console.log("Logging an exception here")
+        Log.Exception(e);
+        console.log("now continuing....")
+    }
 }
 
 function AwsStyleResponse(resp:any):any
