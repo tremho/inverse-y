@@ -29,7 +29,7 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
     // console.log(">>>>>>>>>>>>>> Invoking login -- see you on the otehr side...")
     // TODO: Let's create a mapping resource (s3) that pairs host with webhost
     // for now, we there is only one
-    const webhost = host; // "https://www.tremho.com"
+    const webhost = "https://www.tremho.com"
     const page = await loadAndReturnPageForProvider(webhost, session.appId, session.provider, jwt);
     return page
 }
@@ -58,7 +58,7 @@ async function loadAndReturnPageForProvider(webhost:string, appId:string, provid
 {
     // return returnStaticHtmlForProvider();
     return new Promise(resolve => {
-        axios.get(`${webhost}/ssx/${providerId}.html`).then(res =>{
+        axios.get(`${webhost}/sso/${providerId}.html`).then(res =>{
             if(res.status === 200)
             {
                 let data = res.data;
