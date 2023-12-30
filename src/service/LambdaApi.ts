@@ -390,7 +390,8 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
                 headers: req.headers
             },
             cookies,
-            parameters
+            parameters,
+            body: eventIn.body
         }
         return eventOut;
     }
