@@ -1,5 +1,6 @@
 import {createSiaToken, getSlotData, getSlotIdFromToken, reserveSlotForSIA} from "../Support/SiaToken";
-import http from "http";
+// import http from "http";
+import axios from "axios";
 import {Session, sessionSave, sessionGet} from "./Session";
 
 
@@ -57,17 +58,14 @@ async function loadAndReturnPageForProvider(webhost:string, appId:string, provid
 {
     // return returnStaticHtmlForProvider();
     return new Promise(resolve => {
-        http.get(`${webhost}/ssx/${providerId}.html`, res =>{
-            if(res.statusCode === 200)
+        axios.get(`${webhost}/ssx/${providerId}.html`).then(res =>{
+            if(res.status === 200)
             {
-                let data = '';
-                res.on('data', chunk => { data += chunk });
-                res.on('close', () => {
-                    resolve(data
-                        .replace("SIA_TOKEN_GOES_HERE", siaToken)
-                        .replace("APPID_GOES_HERE", appId)
-                    );
-                })
+                let data = res.data;
+                resolve(data
+                    .replace("SIA_TOKEN_GOES_HERE", siaToken)
+                    .replace("APPID_GOES_HERE", appId)
+                );
             }
         })
     })
