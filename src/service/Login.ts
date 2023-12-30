@@ -57,7 +57,7 @@ async function loadAndReturnPageForProvider(webhost:string, appId:string, provid
 {
     // return returnStaticHtmlForProvider();
     return new Promise(resolve => {
-        http.get(`${webhost}/sso/${providerId}.html`, res =>{
+        http.get(`${webhost}/ssx/${providerId}.html`, res =>{
             if(res.statusCode === 200)
             {
                 let data = '';
