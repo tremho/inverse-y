@@ -401,7 +401,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
     }
 }
 
-function AwsStyleResponse(resp:any):any
+export function AwsStyleResponse(resp:any):any
 {
     const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
     if(typeof resp != "object") {

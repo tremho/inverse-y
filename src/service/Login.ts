@@ -3,6 +3,7 @@ import {createSiaToken, getSlotData, getSlotIdFromToken, reserveSlotForSIA} from
 import axios from "axios";
 import {Session, sessionSave, sessionGet} from "./Session";
 import {Success} from "./Responses";
+import {AwsStyleResponse} from "./LambdaApi"
 
 
 /**
@@ -32,7 +33,7 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<an
     // for now, we there is only one
     const webhost = "https://www.tremho.com"
     const page = await loadAndReturnPageForProvider(webhost, session.appId, session.provider, jwt);
-    return Success(page);
+    return AwsStyleResponse(Success(page));
 }
 
 /**
