@@ -403,9 +403,11 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 
 export function AwsStyleResponse(resp:any):any
 {
+    Log.Trace("In AwsStyleResponse with incoming resp", resp)
     const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
     if(typeof resp != "object") {
         // console.log(`resp is type ${ typeof resp }`)
+        Log.Trace(`Resp istype ${ typeof resp }`)
         resp = {
             statusCode: 200,
             body: ""+resp,
@@ -452,6 +454,7 @@ export function AwsStyleResponse(resp:any):any
         }
 
         if (resp.contentType !== undefined) {
+            Log.Debug("Content-type is being set to "+ resp.contentType)
             aws.headers["content-type"] = resp.contentType
             delete resp.contentType
         }
@@ -459,6 +462,7 @@ export function AwsStyleResponse(resp:any):any
         if(resp) aws.body = resp.body ?? resp.result
 
         // console.log("AWS response ", aws);
+        Log.Debug("AWS Response", aws);
         return aws;
     }
 }
