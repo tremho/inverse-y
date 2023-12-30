@@ -334,7 +334,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 
         // console.log("continuing adorn with req", req)
 
-        const domain = req.domainName;
+        const domain = req.domainName ?? "";
 
         const pathLessStage = req.stage ? req.path.substring(req.stage.length + 1) : req.path;
         Log.Debug(`path values`, {path: req.path, stage: req.stage, pathLessStage})
@@ -385,7 +385,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 
         const eventOut: any = {
             request: {
-                originalUrl: host + domain + pathLessStage,
+                originalUrl: path,
                 headers: req.headers
             },
             cookies,
