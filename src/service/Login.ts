@@ -2,6 +2,7 @@ import {createSiaToken, getSlotData, getSlotIdFromToken, reserveSlotForSIA} from
 // import http from "http";
 import axios from "axios";
 import {Session, sessionSave, sessionGet} from "./Session";
+import {Success} from "./Responses";
 
 
 /**
@@ -11,7 +12,7 @@ import {Session, sessionSave, sessionGet} from "./Session";
  * @param session
  * @param invokingUrl
  */
-export async function loginBegin(session:Session, invokingUrl:string):Promise<string>
+export async function loginBegin(session:Session, invokingUrl:string):Promise<any>
 {
     const jwt = await createSiaToken(session.appId);
     session.siaToken = jwt;
@@ -31,7 +32,7 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<st
     // for now, we there is only one
     const webhost = "https://www.tremho.com"
     const page = await loadAndReturnPageForProvider(webhost, session.appId, session.provider, jwt);
-    return page
+    return Success(page);
 }
 
 /**
