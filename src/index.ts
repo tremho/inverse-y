@@ -5,7 +5,8 @@ import {
     ParamSet,
     ReturnDef,
     RequestEvent,
-    ServiceDefinition
+    ServiceDefinition,
+    AwsStyleResponse
 }
  from './service/LambdaApi'
 
@@ -76,6 +77,7 @@ export {ParamSet as ParamSet}
 export {ReturnDef as ReturnDef}
 export {RequestEvent as RequestEvent}
 export {ServiceDefinition as ServiceDefinition}
+export {AwsStyleResponse as AwsStyleResponse}
 
 export {Success as Success}
 export {BadRequest as BadRequest}
