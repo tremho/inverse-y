@@ -437,8 +437,8 @@ export function AwsStyleResponse(resp:any):any
             aws.statusCode = resp.statusCode;
             delete resp.statusCode
         }
+        const body = resp.body ?? resp.result ?? resp;
         if(!resp.contentType) {
-            const body = resp.body ?? resp.result ?? "";
             try {
                 JSON.parse(body);
                 resp.contentType = "application/json"
@@ -450,8 +450,6 @@ export function AwsStyleResponse(resp:any):any
                     } else {
                         resp.contentType = "text/plain"
                     }
-                }else{
-                    resp.contentType = "application/octet-stream"
                 }
             }
         }
