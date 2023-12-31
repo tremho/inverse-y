@@ -404,6 +404,8 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 export function AwsStyleResponse(resp:any):any
 {
     Log.Trace("In AwsStyleResponse with incoming resp", resp)
+    if(resp.isBase64Encoded !== undefined && resp.statusCode && && resp.headers && resp.body) return resp; // it's already aws form
+
     const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
     if(typeof resp != "object") {
         // console.log(`resp is type ${ typeof resp }`)
