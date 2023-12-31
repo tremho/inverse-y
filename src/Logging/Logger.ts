@@ -19,7 +19,7 @@ export function LogAtLevel(level:any, message:string, ...other:any[]) {
     let [others] = other //
     if(level < currentLevel) {
         let outline = formatClogMessage(level, message, false)
-        console.log(outline, ...other)
+        console.log(outline, ...other[0])
         if(others) {
             outline += " - " + logRecord.push(JSON.stringify(others))
         }

@@ -444,11 +444,14 @@ export function AwsStyleResponse(resp:any):any
                 resp.contentType = "application/json"
             }
             catch(e:any) {
-                if( body.indexOf("<html>") !== -1) {
-                    resp.contentType = "text/html"
-                }
-                else {
-                    resp.contentType = "text/plain"
+                if(typeof body === "string") {
+                    if (body.indexOf("<html>") !== -1) {
+                        resp.contentType = "text/html"
+                    } else {
+                        resp.contentType = "text/plain"
+                    }
+                }else{
+                    resp.contentType = "application/octet-stream"
                 }
             }
         }
