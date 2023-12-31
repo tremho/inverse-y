@@ -308,13 +308,17 @@ export class LambdaApi<TEvent> {
 
         // Log.Info("Service Definition", this.definition);
 
+        Log.Info("Service entry point")
         if(this.handler) {
             try {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
                 let xevent = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
                 // console.log(">>> calling the handler, expecting promise "+JSON.stringify(xevent, null, 2))
-                const resp = AwsStyleResponse(await this.handler(xevent));
-                // console.log(">>> Response "+JSON.stringify(resp, null, 2));
+                Log.Trace("Calling handler...")
+                const rawReturn = await this.handler(xevent);
+                Log.Trace("RawReturn is", rawReturn);
+                const resp = AwsStyleResponse(rawReturn);
+                Log.Trace("response out", resp);
                 return resp;
             } catch(e:any) {
                 Log.Exception(e);
