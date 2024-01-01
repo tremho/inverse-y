@@ -1,7 +1,7 @@
 
-export function Success(result:any) {
+export function Success(result:any, contentType = undefined) {
     const statusCode = (result === undefined || result === null) ? 204 : 200
-    return {statusCode, result}
+    return {statusCode, result, contentType}
 }
 
 export function BadRequest(message:string) {
