@@ -1,5 +1,5 @@
 
-export function Success(result:any, contentType = undefined) {
+export function Success(result:any, contentType:string | undefined = undefined) {
     const statusCode = (result === undefined || result === null) ? 204 : 200
     return {statusCode, result, contentType}
 }
