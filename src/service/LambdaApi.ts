@@ -317,6 +317,8 @@ export class LambdaApi<TEvent> {
                 Log.Trace("Calling handler...")
                 const rawReturn = await this.handler(xevent);
                 Log.Trace("RawReturn is", rawReturn);
+                if(rawReturn.result) return rawReturn.result;
+
                 const resp = AwsStyleResponse(rawReturn);
                 Log.Trace("response out", resp);
                 return resp;
@@ -342,7 +344,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 
         const pathLessStage = req.stage ? req.path.substring(req.stage.length + 1) : req.path;
         Log.Debug(`path values`, {path: req.path, stage: req.stage, pathLessStage})
-        let path = domain ? "https://" + domain + pathLessStage : req.path;
+        let path = domain ? "https://" + domain + pathLessStage : req.path ?? "";
         // console.log(">> path (originalurl) found to be "+path);
         let host = req.headers?.origin ?? domain
         if (!host) {
