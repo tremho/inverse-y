@@ -1,7 +1,7 @@
 
-export function Success(result:any, contentType:string | undefined = undefined) {
+export function Success(result:any, contentType:string | undefined = undefined, isBinary: boolean = false) {
     const statusCode = (result === undefined || result === null) ? 204 : 200
-    return {statusCode, result, contentType}
+    return {statusCode, result, contentType, isBinary}
 }
 
 export function BadRequest(message:string) {
