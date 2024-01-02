@@ -317,7 +317,7 @@ export class LambdaApi<TEvent> {
                 Log.Trace("Calling handler...")
                 const rawReturn = await this.handler(xevent);
                 Log.Trace("RawReturn is", rawReturn);
-                if(rawReturn.result) return rawReturn.result;
+                // if(rawReturn.result) return rawReturn.result;
 
                 const resp = AwsStyleResponse(rawReturn);
                 Log.Trace("response out", resp);
