@@ -58,7 +58,7 @@ async function loadAndReturnPageForProvider(webhost:string, appId:string, provid
 {
     // return returnStaticHtmlForProvider();
     return new Promise(resolve => {
-        axios.get(`${webhost}/ssx/${providerId}.html`).then(res =>{
+        axios.get(`${webhost}/sso/${providerId}.html`).then(res =>{
             if(res.status === 200)
             {
                 let data = res.data;
