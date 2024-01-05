@@ -464,7 +464,7 @@ export function AwsStyleResponse(resp:any):any
 
 
 
-        if (resp.contentType !== undefined) {
+        if (resp.contentType !== undefined && resp.statusCode !== 301) {
             Log.Debug("Content-type is being set to "+ resp.contentType)
             aws.headers["content-type"] = resp.contentType
             delete resp.contentType
