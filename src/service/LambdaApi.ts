@@ -425,25 +425,25 @@ export function AwsStyleResponse(resp:any):any
         if (resp.cookies !== undefined) {
             var cookies: any = []
             var age = resp.cookies.expireSeconds ?? 60; // 1 minute
-            delete resp.expireSeconds;
+            // delete resp.expireSeconds;
             Object.getOwnPropertyNames(resp.cookies).forEach(name => {
                 var value = resp.cookies[name];
                 cookies.push(`${name}=${value}; Max-Age=${age}; `);
             })
             // aws.headers["set-cookie"] = cookies
             aws.cookies = cookies;
-            delete resp.cookies;
+            // delete resp.cookies;
         }
         if (resp.headers !== undefined) {
 
             for (var hdr of Object.getOwnPropertyNames(resp.headers)) {
                 aws.headers[hdr] = resp.headers[hdr]
             }
-            delete resp.headers;
+            // delete resp.headers;
         }
         if (resp.statusCode !== undefined) {
             aws.statusCode = resp.statusCode;
-            delete resp.statusCode
+            // delete resp.statusCode
         }
         const body = resp.body ?? resp.result ?? resp;
         if(!resp.contentType) {
@@ -467,8 +467,9 @@ export function AwsStyleResponse(resp:any):any
         if (resp.contentType !== undefined && resp.statusCode !== 301) {
             Log.Debug("Content-type is being set to "+ resp.contentType)
             aws.headers["content-type"] = resp.contentType
-            delete resp.contentType
+            // delete resp.contentType
         }
+        if(resp.stat)
 
         // if marked is binary, body is already base64 encoded by caller
         aws.isBase64Encoded = resp.isBinary || false;
