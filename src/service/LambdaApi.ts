@@ -464,16 +464,19 @@ export function AwsStyleResponse(resp:any):any
 
 
 
-        if (resp.contentType !== undefined && resp.statusCode !== 301) {
+        if (resp.contentType !== undefined && resp.statusCode != 301) {
             Log.Debug("Content-type is being set to "+ resp.contentType)
             aws.headers["content-type"] = resp.contentType
             // delete resp.contentType
         }
-        if(resp.stat)
+
+        if(""+resp.statusCode == "301") {
+            delete aws.headers["content-type"];
+        }
 
         // if marked is binary, body is already base64 encoded by caller
         aws.isBase64Encoded = resp.isBinary || false;
-        if(resp) aws.body = resp.body ?? resp.result
+        aws.body = resp?.body ?? resp?.result ?? "";
 
         // console.log("AWS response ", aws);
         Log.Debug("AWS Response", aws);
