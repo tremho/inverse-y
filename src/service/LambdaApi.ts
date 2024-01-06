@@ -426,12 +426,14 @@ export function AwsStyleResponse(resp:any):any
             var cookies: any = []
             var age = resp.cookies.expireSeconds ?? 60; // 1 minute
             // delete resp.expireSeconds;
+            aws.headers["set-cookie"] = "";
             Object.getOwnPropertyNames(resp.cookies).forEach(name => {
                 var value = resp.cookies[name];
-                cookies.push(`${name}=${value}; Max-Age=${age}; `);
+                // cookies.push(`${name}=${value}; Max-Age=${age}; `);
+                aws.headers["set-cookie"] += `${name}=${value}; Max-Age=${age}; `
             })
             // aws.headers["set-cookie"] = cookies
-            aws.cookies = cookies;
+            // aws.cookies = cookies
             // delete resp.cookies;
         }
         if (resp.headers !== undefined) {
