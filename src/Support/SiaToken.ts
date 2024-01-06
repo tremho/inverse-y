@@ -104,7 +104,7 @@ export async function getSlotIdFromToken(
         validationError += ' invalid iss'
     }
     if (appId !== '*' && jwt.payload.aud !== appId) {
-        validationError += ' invalid aud'
+        validationError += ` invalid aud (${jwt.payload.aud} vs ${appId})`
     }
     let exp:number = jwt.payload.exp ?? 0;
     let iat:number = jwt.payload.iat ?? 0;
