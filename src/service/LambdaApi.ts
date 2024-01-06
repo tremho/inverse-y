@@ -472,7 +472,7 @@ export function AwsStyleResponse(resp:any):any
 
         if(""+resp.statusCode == "301") {
             delete aws.headers["content-type"];
-            aws.headers['Access-Control-Allow-Origin'] = "*"
+            // aws.headers['Access-Control-Allow-Origin'] = "*"
         }
 
         // if marked is binary, body is already base64 encoded by caller
