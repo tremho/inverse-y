@@ -362,10 +362,12 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 
         var cookies: any = {};
         var cookieString = req.headers?.cookie ?? "";
+        Log.Debug("Request Cookies", cookieString)
         var crumbs = cookieString.split(';')
         for (let c of crumbs) {
             const pair: string[] = c.split('=');
             if (pair.length === 2) cookies[pair[0]] = pair[1]
+            Log.Debug(`setting cookie ${pair[0]} = ${pair[1]}`)
         }
         const parameters: any = eventIn.parameters ?? {}
         const tslots = template.split('/').slice(1);
