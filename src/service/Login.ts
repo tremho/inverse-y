@@ -1,5 +1,5 @@
 import {createSiaToken, getSlotData, getSlotIdFromToken, reserveSlotForSIA} from "../Support/SiaToken";
-// import http from "http";
+import {Log} from "../Logging/Logger"
 import axios from "axios";
 import {Session, sessionSave, sessionGet} from "./Session";
 import {Success} from "./Responses";
@@ -21,6 +21,7 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<an
     await reserveSlotForSIA(session, jwt);
     const t = Date.now();
     // http(s)://mydomain:port/
+    Log.Debug("invokingUrl", invokingUrl);
     const ptci = invokingUrl.indexOf("://");
     if(ptci === -1) {
         throw new Error("Unable to resolve host from invokingUrl");
@@ -28,8 +29,10 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<an
     let hei = invokingUrl.indexOf('/', ptci+3)
     if(hei === -1) hei = invokingUrl.length;
     const host = invokingUrl.substring(0, hei);
+    Log.Debug("host", host)
     // console.log(">>>>>>>>>>>>>> Invoking login -- see you on the otehr side...")
     const webhost = host+"/Dev" // todo: stage
+    Log.Debug("webhost", webhost);
     const page = await loadAndReturnPageForProvider(webhost, session.appId, session.provider, jwt);
     return AwsStyleResponse(Success(page));
 }
