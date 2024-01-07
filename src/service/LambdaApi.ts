@@ -306,19 +306,18 @@ export class LambdaApi<TEvent> {
 
         */
 
-        // Log.Info("Service Definition", this.definition);
+        const isAws = (event as any).requestContext !== undefined
+        Log.Info("Service Definition", this.definition);
 
-        Log.Info("Service entry point", event)
+        Log.Info("Service entry point", isAws && event)
         if(this.handler) {
             try {
-                if(!(event as any).requestContext) (event as any).requestContext = {};
+                if(!isAws) (event as any).requestContext = {};
                 let xevent = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
                 Log.Debug("XEvent after adornment", xevent)
-                // console.log(">>> calling the handler, expecting promise "+JSON.stringify(xevent, null, 2))
                 Log.Trace("Calling handler...")
                 const rawReturn = await this.handler(xevent);
                 Log.Trace("RawReturn is", rawReturn);
-                // if(rawReturn.result) return rawReturn.result;
 
                 const resp = AwsStyleResponse(rawReturn);
                 Log.Trace("response out", resp);
@@ -334,7 +333,6 @@ export class LambdaApi<TEvent> {
 
 function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 {
-    // console.log("entering adornEventFromLambdaRequest")
     try {
         if (!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
         const req = eventIn.requestContext;
@@ -347,7 +345,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         const pathLessStage = req.stage ? req.path.substring(req.stage.length + 1) : req.path;
         Log.Debug(`path values`, {path: req.path, stage: req.stage, pathLessStage})
         let path = domain ? "https://" + domain + pathLessStage : req.path ?? "";
-        // console.log(">> path (originalurl) found to be "+path);
+
         let host = req.headers?.origin ?? domain
         if (!host) {
             host = req.headers?.referer ?? "";
