@@ -345,7 +345,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 
         const pathLessStage = req.stage ? req.path.substring(req.stage.length + 1) : req.path;
         Log.Debug(`path values`, {path: req.path, stage: req.stage, pathLessStage})
-        let path = domain ? "https://" + domain + pathLessStage : req.path ?? "";
+        let path = domain ? "https://" + domain + pathLessStage : req.path ?? eventIn.request.originalUrl ?? "";
 
         let host = req.headers?.origin ?? domain
         if (!host) {
