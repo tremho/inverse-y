@@ -13,7 +13,7 @@ import {AwsStyleResponse} from "./LambdaApi"
  * @param session
  * @param invokingUrl
  */
-export async function loginBegin(session:Session, invokingUrl:string):Promise<any>
+export async function loginBegin(session:Session, invokingUrl:string, stage:string):Promise<any>
 {
     const jwt = await createSiaToken(session.appId);
     session.siaToken = jwt;
@@ -31,7 +31,8 @@ export async function loginBegin(session:Session, invokingUrl:string):Promise<an
     const host = invokingUrl.substring(0, hei);
     Log.Debug("host", host)
     // console.log(">>>>>>>>>>>>>> Invoking login -- see you on the otehr side...")
-    const webhost = host+"/Dev" // todo: stage
+    if(stage && stage.charAt(0) !== "/") stage = "/"+stage
+    const webhost = host+stage
     Log.Debug("webhost", webhost);
     const page = await loadAndReturnPageForProvider(webhost, session.appId, session.provider, jwt);
     return AwsStyleResponse(Success(page));

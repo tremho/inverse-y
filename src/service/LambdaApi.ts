@@ -398,6 +398,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
                 originalUrl: path,
                 headers: req.headers
             },
+            stage: req.stage,
             cookies,
             parameters,
             body: eventIn.body
