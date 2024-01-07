@@ -308,11 +308,12 @@ export class LambdaApi<TEvent> {
 
         // Log.Info("Service Definition", this.definition);
 
-        Log.Info("Service entry point")
+        Log.Info("Service entry point", event)
         if(this.handler) {
             try {
                 if(!(event as any).requestContext) (event as any).requestContext = {};
                 let xevent = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
+                Log.Debug("XEvent after adornment", xevent)
                 // console.log(">>> calling the handler, expecting promise "+JSON.stringify(xevent, null, 2))
                 Log.Trace("Calling handler...")
                 const rawReturn = await this.handler(xevent);
