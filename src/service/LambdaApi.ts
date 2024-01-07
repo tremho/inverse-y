@@ -342,7 +342,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         let cookiesFromSomewhere = eventIn.multiValueHeaders?.Cookie ?? [eventIn.headers?.Cookie];
         if(eventIn.cookies) {
             cookiesFromSomewhere = [];
-            for(let k in Object.getOwnPropertyNames(eventIn.cookies)) {
+            for(let k of Object.getOwnPropertyNames(eventIn.cookies)) {
                 let v = eventIn.cookies[k];
                 cookiesFromSomewhere.push(`${k}=${v}`)
             }
