@@ -340,9 +340,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         const req = eventIn.requestContext;
 
         Log.Debug("Incoming request context", req)
-        Log.Debug("EventIn Cookies", eventIn.cookies)
-        Log.Debug("EventIn.headers Cookies", eventIn.cookies)
-        const cookiesFromSomewhere = eventIn.cookies ?? eventIn.headers.cookies;
+        const cookiesFromSomewhere = eventIn.multiValueHeaders.Cookie ?? [eventIn.headers.Cookie];
 
         const domain = req.domainName ?? "";
 
