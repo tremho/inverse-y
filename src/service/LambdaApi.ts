@@ -306,7 +306,7 @@ export class LambdaApi<TEvent> {
 
         */
 
-        const isAws = (event as any).requestContext !== undefined
+        const isAws = (event as any).requestContext?.stage !== undefined
         Log.Info(isAws ? "AWS Lamdba context detected" : "Express Local context");
         Log.Info("Service Definition", this.definition);
 
