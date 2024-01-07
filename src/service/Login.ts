@@ -31,7 +31,8 @@ export async function loginBegin(session:Session, invokingUrl:string, stage:stri
     const host = invokingUrl.substring(0, hei);
     Log.Debug("host", host)
     // console.log(">>>>>>>>>>>>>> Invoking login -- see you on the otehr side...")
-    if(stage && stage.charAt(0) !== "/") stage = "/"+stage
+    if(!stage) stage = "";
+    else if(stage.charAt(0) !== "/") stage = "/"+stage
     const webhost = host+stage
     Log.Debug("webhost", webhost);
     const page = await loadAndReturnPageForProvider(webhost, session.appId, session.provider, jwt);
