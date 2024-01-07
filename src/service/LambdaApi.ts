@@ -339,6 +339,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         const req = eventIn.requestContext;
 
         Log.Debug("Incoming request context", req)
+        Log.Debug("EventIn Cookies", eventIn.cookies)
 
         const domain = req.domainName ?? "";
 
@@ -361,7 +362,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         if(!domain) path = host + req.path;
 
         var cookies: any = {};
-        var cookieString = req.headers?.cookie ?? "";
+        var cookieString = req.headers?.cookie ?? (eventIn.cookies ?? []).join(';');
         Log.Debug("Request Cookies", cookieString)
         var crumbs = cookieString.split(';')
         for (let c of crumbs) {
