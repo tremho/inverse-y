@@ -423,16 +423,15 @@ export function AwsStyleResponse(resp:any):any
     }
     if(resp) {
         if (resp.cookies !== undefined) {
-            var cookies: any = []
-            var age = resp.cookies.expireSeconds ?? 60; // 1 minute
+            const cookies: any = []
+            let cookieCount = 0;
+            let age = resp.cookies.expireSeconds ?? 60; // 1 minute
             // delete resp.expireSeconds;
             Object.getOwnPropertyNames(resp.cookies).forEach(name => {
                 var value = resp.cookies[name];
                 // cookies.push(`${name}=${value}; Max-Age=${age}; `);
+                AwsSetCookie(aws, `${name}=${value}; Max-Age=${age}; `, cookieCount++)
             })
-            aws.headers["set-cookie"] = cookies
-            // aws.cookies = cookies
-            // delete resp.cookies;
         }
         if (resp.headers !== undefined) {
 
@@ -483,4 +482,28 @@ export function AwsStyleResponse(resp:any):any
         Log.Debug("AWS Response", aws);
         return aws;
     }
+}
+
+// Lambda only allows one value per header, so to set multiple cookies
+// we must set multiple case variations between "set-cookie" and "SET-COOKIE".
+// There are 512 combinations, which should be enough.
+function AwsSetCookie(aws:any, cookie:string, count:number)
+{
+    let b = count.toString(2);
+    if(b.length < 9) b = "0".repeat(9-b.length)+b
+    const key = "set-cookie"
+    let bp = 0;
+    let kp = 0;
+    let keyOut = "";
+    while(kp < key.length)
+    {
+        let c = key.charAt(kp);
+        if(c !== "-") {
+            if(b.charAt(bp) === "1") c = c.toUpperCase();
+            bp++;
+        }
+        keyOut += c;
+        kp++;
+    }
+    aws.headers[keyOut] = cookie;
 }
