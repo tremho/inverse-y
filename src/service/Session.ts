@@ -45,10 +45,16 @@ export class Session {
  * @param incomingSessionId
  * @param hostDomain
  */
-export async function sessionGet(incomingSessionId?:string):Promise<Session>
+export async function sessionGet(incomingSessionId?:string):Promise<Session | undefined>
 {
-    const session = incomingSessionId ? await s3GetObject(BUCKET_SESSION, incomingSessionId) : new Session();
-    if(!session.id) {
+    let session = new Session();
+    try {
+        if (incomingSessionId) session = await s3GetObject(BUCKET_SESSION, incomingSessionId);
+    }
+    catch(e)
+    { }
+
+    if (!session.id) {
         session.id = randomUUID();
         session.authenticatedAt = 0; // invalid
         // await sessionSave(session); // don't save an empty session
