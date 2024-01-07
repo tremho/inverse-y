@@ -337,8 +337,8 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         if (!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
         const req = eventIn.requestContext;
 
-        Log.Debug("Incoming request context", req)
-        const cookiesFromSomewhere = eventIn.multiValueHeaders.Cookie ?? [eventIn.headers.Cookie];
+        if(req.stage !== undefined) Log.Debug("Incoming request context", req)
+        const cookiesFromSomewhere = eventIn.multiValueHeaders?.Cookie ?? [eventIn.headers?.Cookie];
 
         const domain = req.domainName ?? "";
 
@@ -411,7 +411,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 
 export function AwsStyleResponse(resp:any):any
 {
-    Log.Trace("In AwsStyleResponse with incoming resp", resp)
+    // Log.Trace("In AwsStyleResponse with incoming resp", resp)
     if(resp.isBase64Encoded !== undefined && resp.statusCode && resp.headers && resp.body) return resp; // it's already aws form
 
     const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
