@@ -338,7 +338,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         if (!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
         const req = eventIn.requestContext;
 
-        // console.log("continuing adorn with req", req)
+        Log.Debug("Incoming request context", req)
 
         const domain = req.domainName ?? "";
 
