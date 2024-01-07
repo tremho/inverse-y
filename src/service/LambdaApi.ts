@@ -359,7 +359,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             host = "http://" + req.headers?.host ?? "";
         }
         // console.log("host is "+host)
-        if(!domain) path = host + req.path;
+        // if(!domain) path = host + req.path;
 
         var cookies: any = {};
         var cookieString = req.headers?.cookie ?? (cookiesFromSomewhere ?? []).join(';');
