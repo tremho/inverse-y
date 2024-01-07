@@ -45,7 +45,7 @@ export class Session {
  * @param incomingSessionId
  * @param hostDomain
  */
-export async function sessionGet(incomingSessionId?:string):Promise<Session | undefined>
+export async function sessionGet(incomingSessionId?:string):Promise<Session>
 {
     let session = new Session();
     try {
