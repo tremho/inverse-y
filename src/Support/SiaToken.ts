@@ -88,36 +88,42 @@ export async function getSlotIdFromToken(
 ):Promise<string>
 {
     Log.Trace("getSlotIdFromToken", siaToken);
-    const jwt = await jwtVerify(siaToken, serverInstance.secretKey);
-    Log.Trace('successful return of jwtVerify (verify SIA)')
-    Log.Trace('    ' + JSON.stringify(jwt))
-    Log.Trace('')
-    Log.Trace(' -- protected Header-- ')
-    Log.Trace('   ' + JSON.stringify(jwt.protectedHeader))
-    Log.Trace(' -- payload-- ')
-    Log.Trace('   ' + JSON.stringify(jwt.payload))
-
-    // more validation
     let validationError = ''
-    let slot:string = '';
-    if (jwt.payload.iss !== 'https://tremho.com') {
-        validationError += ' invalid iss'
+    let slot: string = '';
+    try {
+        const jwt = await jwtVerify(siaToken, serverInstance.secretKey);
+        Log.Trace('successful return of jwtVerify (verify SIA)')
+        Log.Trace('    ' + JSON.stringify(jwt))
+        Log.Trace('')
+        Log.Trace(' -- protected Header-- ')
+        Log.Trace('   ' + JSON.stringify(jwt.protectedHeader))
+        Log.Trace(' -- payload-- ')
+        Log.Trace('   ' + JSON.stringify(jwt.payload))
+
+        // more validation
+        if (jwt.payload.iss !== 'https://tremho.com') {
+            validationError += ' invalid iss'
+        }
+        if (appId !== '*' && jwt.payload.aud !== appId) {
+            validationError += ` invalid aud (${jwt.payload.aud} vs ${appId})`
+        }
+        let exp: number = jwt.payload.exp ?? 0;
+        let iat: number = jwt.payload.iat ?? 0;
+        let auth_time: number = (jwt.payload as any).auth_time ?? 0;
+        if (auth_time * 1000 >= Date.now()) {
+            validationError = ' created in future/clock error'
+        } else if (iat < auth_time || 0) {
+            validationError = ' bad iat/auth_time'
+        } else if (exp * 1000 < Date.now()) {
+            validationError = ' expired token'
+        }
+        slot = (jwt.payload as any).slotId ?? ""
+        // deep validation of c_hash to 'code' value of idToken could be possible, but we'll skip that
     }
-    if (appId !== '*' && jwt.payload.aud !== appId) {
-        validationError += ` invalid aud (${jwt.payload.aud} vs ${appId})`
+    catch(e:any)
+    {
+        validationError = e.message;
     }
-    let exp:number = jwt.payload.exp ?? 0;
-    let iat:number = jwt.payload.iat ?? 0;
-    let auth_time:number = (jwt.payload as any).auth_time ?? 0;
-    if (auth_time * 1000 >= Date.now()) {
-        validationError = ' created in future/clock error'
-    } else if (iat < auth_time||0) {
-        validationError = ' bad iat/auth_time'
-    } else if (exp * 1000 < Date.now()) {
-        validationError = ' expired token'
-    }
-    slot = (jwt.payload as any).slotId ?? ""
-    // deep validation of c_hash to 'code' value of idToken could be possible, but we'll skip that
 
     if (validationError) {
         Log.Error('SIA validation error: ' + validationError)
