@@ -118,7 +118,7 @@ export async function s3Delete(bucket:string, key:string)
         const statusCode = response.$metadata.httpStatusCode;
         Log.Info('Response code from delete command is ' + statusCode);
 
-        if (statusCode !== 200) throw new IOException.DeleteFailed(`s3Delete Failed with statusCode=${statusCode}`)
+        if (!statusCode || statusCode < 200 || statusCode >= 300 ) throw new IOException.DeleteFailed(`s3Delete Failed with statusCode=${statusCode}`)
     }
     catch(e:any)
     {
