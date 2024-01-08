@@ -25,12 +25,12 @@ const s3Client = new S3Client({region: REGION})
 export async function s3PutText(bucket:string, key:string, text:string)
 {
     try {
-        Log.Error("Putting to S3", {bucket, key})
+        Log.Info("Putting to S3", {bucket, key})
         const response = await s3Client.send(
             new PutObjectCommand({Bucket: bucket, Key: key, Body: text})
         );
         const statusCode = response.$metadata.httpStatusCode;
-        Log.Info('Response code from put command is ' + statusCode);
+        Log.Info('Response code from s3 put command is ' + statusCode);
 
         if (statusCode !== 200) {
             throw new IOException.PutFailed(`s3PutText Failed with statusCode=${statusCode}`)
@@ -70,6 +70,7 @@ export async function s3PutObject(bucket:string, key:string, data:any)
 export async function s3GetResponse(bucket:string, key:string)
 {
     try {
+        Log.Info("S3 Get", {bucket, key})
         return await s3Client.send(
             new GetObjectCommand({Bucket:bucket, Key:key})
         )
@@ -110,7 +111,7 @@ export async function s3GetObject(bucket:string, key:string):Promise<any>
 export async function s3Delete(bucket:string, key:string)
 {
     try {
-        Log.Error("S3 Delete ", {bucket, key})
+        Log.Info("S3 Delete ", {bucket, key})
         const response = await s3Client.send(
             new DeleteObjectCommand( {Bucket: bucket, Key: key})
         )
@@ -121,7 +122,7 @@ export async function s3Delete(bucket:string, key:string)
     }
     catch(e:any)
     {
-        Log.Error("S3 Delete failed ", {bucket, key})
+        Log.Error("S3 Delete failed "+e.message, {bucket, key})
         Log.Exception(e);
         throw new IOException.DeleteFailed(`s3Delete Failed on exception: ${e.message}`)
     }
