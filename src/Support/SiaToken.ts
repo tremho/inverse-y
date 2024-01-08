@@ -162,7 +162,9 @@ export async function getSlotData(slotId:string):Promise<SlotData>
 {
     try {
         Log.Debug("retrieving slot data at ",slotId)
-        return  await s3GetObject(BUCKET_SIA_SLOTS, slotId)
+        const data =  await s3GetObject(BUCKET_SIA_SLOTS, slotId)
+        Log.Debug("slotData from S3", data);
+        return data;
     }
     catch(e) {
         Log.Error("failed to get slot data at "+slotId)
