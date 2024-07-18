@@ -417,12 +417,12 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 // format response in AWS style
 export function AwsStyleResponse(resp:any):any
 {
-    // Log.Trace("In AwsStyleResponse with incoming resp", resp)
+    Log.Trace("In AwsStyleResponse with incoming resp", resp)
     if(resp.isBase64Encoded !== undefined && resp.statusCode && resp.headers && resp.body) return resp; // it's already aws form
 
     const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
     if(typeof resp != "object") {
-        // console.log(`resp is type ${ typeof resp }`)
+        console.log(`resp is type ${ typeof resp }`)
         Log.Trace(`Resp istype ${ typeof resp }`)
         resp = {
             statusCode: 200,
@@ -431,7 +431,7 @@ export function AwsStyleResponse(resp:any):any
     }
     if(resp) {
         if (resp.cookies !== undefined) {
-            const cookies: any = []
+            Log.Trace("AwsStyleResponse - Setting cookies")
             let cookieCount = 0;
             // delete resp.expireSeconds;
             Object.getOwnPropertyNames(resp.cookies).forEach(name => {
@@ -442,11 +442,12 @@ export function AwsStyleResponse(resp:any):any
                                : `${name}=${value}; Path=/; Max-Age=${age} SameSite=Strict; HttpOnly`
                 AwsSetCookie(aws, cval, cookieCount++)
             })
-            // aws.headers['set-cookie'] = cookies
         }
+        Log.Trace("AwsStyleResponse -- other headers")
         if (resp.headers !== undefined) {
 
             for (var hdr of Object.getOwnPropertyNames(resp.headers)) {
+                Log.Trace("AwsStyleResponse -- header", {hdr, value: resp.headers[hdr]})
                 aws.headers[hdr] = resp.headers[hdr]
             }
             // delete resp.headers;
@@ -474,13 +475,13 @@ export function AwsStyleResponse(resp:any):any
 
 
 
-        if (resp.contentType !== undefined && resp.statusCode != 301) {
+        if (resp.contentType !== undefined && resp.statusCode != 301 && resp.statusCode != 302) {
             Log.Debug("Content-type is being set to "+ resp.contentType)
             aws.headers["content-type"] = resp.contentType
             // delete resp.contentType
         }
 
-        if(""+resp.statusCode == "301") {
+        if(""+resp.statusCode == "302") {
             delete aws.headers["content-type"];
             // aws.headers['Access-Control-Allow-Origin'] = "*"
         }
@@ -490,7 +491,7 @@ export function AwsStyleResponse(resp:any):any
         aws.body = resp?.body ?? resp?.result ?? "";
 
         // console.log("AWS response ", aws);
-        // Log.Debug("AWS Response", aws);
+        Log.Debug("AWS Response", aws);
         return aws;
     }
 }
@@ -516,5 +517,6 @@ function AwsSetCookie(aws:any, cookie:string, count:number)
         keyOut += c;
         kp++;
     }
+    Log.Trace('AwsSetCookie:',{keyOut, cookie})
     aws.headers[keyOut] = cookie;
 }
