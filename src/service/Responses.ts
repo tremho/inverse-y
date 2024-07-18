@@ -1,37 +1,37 @@
 
 export function Success(result:any, contentType:string | undefined = undefined, isBinary: boolean = false) {
     const statusCode = (result === undefined || result === null) ? 204 : 200
-    return {statusCode, result, contentType, isBinary}
+    return {statusCode, body:result, contentType, isBinary}
 }
 
 export function BadRequest(message:string) {
     const statusCode = 400
-    return {statusCode, result: "BadRequest: "+message}
+    return {statusCode, body: "BadRequest: "+message}
 }
 export function Unauthorized(message:string) {
     const statusCode = 401
-    return {statusCode, result: "Unauthorized: "+message}
+    return {statusCode, body: "Unauthorized: "+message}
 }
 export function Forbidden(message:string)  {
     const statusCode = 403
-    return {statusCode, result: "Forbidden: "+message}
+    return {statusCode, body: "Forbidden: "+message}
 }
 export function NotFound(message:string)  {
     const statusCode = 404
-    return {statusCode, result: "NotFound: "+message}
+    return {statusCode, body: "NotFound: "+message}
 }
 export function MethodNotAllowed(message:string)  {
     const statusCode = 405
-    return {statusCode, result: "Method Not Allowed: "+message}
+    return {statusCode, body: "Method Not Allowed: "+message}
 }
 export function ServerError(message:string) {
     const statusCode = 500
-    return {statusCode, result: "Internal Server Error: "+message}
+    return {statusCode, body: "Internal Server Error: "+message}
 }
 export function ServerException(e:Error) {
     return ServerError(e.stack ?? e.message ?? "");
 }
 export function NotImplemented(message:string) {
     const statusCode = 501
-    return {statusCode, result: "Not Implemented: "+message}
+    return {statusCode, body: "Not Implemented: "+message}
 }

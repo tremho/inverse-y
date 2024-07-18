@@ -8,7 +8,6 @@ export {RequestEvent as RequestEvent}
  * Defines the declaration of a parameter
  * including some optional constraints (min, max, oneOf, match) and an optional default value
  */
-
 export class ParamDef {
     name: string = ''
     type: string = ''
@@ -42,7 +41,7 @@ export class ParamDef {
     }
 }
 
-// Returns a string. if the string != '' it is an validation error message
+// Returns a string. if the string != '' it is a validation error message
 function validateParameter(p:ParamDef, value:any): string
 {
     if(value === undefined && p.default !== undefined) {
@@ -278,50 +277,45 @@ export class LambdaApi<TEvent> {
         return pset
     }
 
+    /**
+     * Main entry point for all launch methods
+     * @param event - incoming event
+     * @param context - incoming context
+     * @param callback - callback to the main function handler
+     */
     async entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
 
-        /* Remove this code - it does nothing...
-
-        // start with fixup of event being passed in as string
-        if(typeof event === 'string') event = JSON.parse(event);
-
-        // console.log("EntryPoint")
-        // console.log("context", context);
-        // console.log("callback", callback);
-        if((event as RequestEvent).version) {
-            throw Error("Found a case of RequestEvent -- Don't remove that code after all!!");
-            // if(typeof this.definition.onRequest === 'function') {
-            //     this.definition.onRequest(event as RequestEvent);
-            // }
-            // // assume this is a request. our event payload is in the body
-            // event = (event as RequestEvent).body;
-        }
-        // console.log("EntryPoint validation")
-        const v = this.validate((event as TEvent))
-        // console.log("EntryPoint validation v = ", v)
-        if (typeof v === 'string') {
-            // console.log("EntryPoint validation v  is string")
-            return ServerError("Parameter validation fails: "+v)
-        }
-
-        */
-
         const isAws = (event as any).requestContext?.stage !== undefined
-        Log.Info(isAws ? "AWS Lamdba context detected" : "Express Local context");
+        Log.Info(isAws ? "AWS Lamdba context detected" : "Local context detected");
         Log.Info("Service Definition", this.definition);
 
         if(isAws) Log.Info("Service entry event", event);
         if(this.handler) {
             try {
-                if(!isAws) (event as any).requestContext = {};
-                let xevent = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
-                Log.Debug("XEvent after adornment", xevent)
+                let anyEvent:any = {};
+                if(!isAws) {
+                    anyEvent = event as any;
+                    anyEvent.requestContext = {};
+                }
+                let xevent:any = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
+
+                Log.Trace("looking for method", {anyEvent})
+                if(!isAws) {
+                    // If a local request, get adornment values from there
+                    xevent.parameters = anyEvent.local?.parameters ?? anyEvent.parameters ?? {}
+                    xevent.cookies = anyEvent.local?.cookies ?? anyEvent.cookies ?? {}
+                    xevent.headers = anyEvent.local?.headers ?? anyEvent.headers ?? {}
+                    xevent.body = anyEvent.local?.body ?? anyEvent.body ?? {}
+                }
+
+                Log.Trace("XEvent after adornment", xevent)
                 Log.Trace("Calling handler...")
                 const rawReturn = await this.handler(xevent);
                 Log.Trace("RawReturn is", rawReturn);
 
                 const resp = AwsStyleResponse(rawReturn);
                 Log.Trace("response out", resp);
+                console.log("");
                 return resp;
             } catch(e:any) {
                 Log.Exception(e);
@@ -332,6 +326,7 @@ export class LambdaApi<TEvent> {
     }
 }
 
+// More fixup mapping for request events
 function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 {
     try {
@@ -351,8 +346,8 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         const domain = req.domainName ?? "";
 
         const pathLessStage = req.stage ? req.path.substring(req.stage.length + 1) : req.path;
-        Log.Debug(`path values`, {path: req.path, stage: req.stage, pathLessStage})
-        let path = domain ? "https://" + domain + pathLessStage : req.path ?? eventIn.request.originalUrl ?? "";
+        if(req.stage) Log.Trace(`path values`, {path: req.path, stage: req.stage, pathLessStage})
+        let path = domain ? "https://" + domain + pathLessStage : req.path ?? eventIn.request?.originalUrl ?? "";
 
         let host = req.headers?.origin ?? domain
         if (!host) {
@@ -362,44 +357,45 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             host = ptci > 3 ? path.substring(0, ei) : "";
         }
         if (!host) {
-            // todo: http or https?
-            host = "http://" + req.headers?.host ?? "";
+            // todo: http or https?npm
+            host = "http://" + req.headers?.host;
         }
         // console.log("host is "+host)
         // if(!domain) path = host + req.path;
 
-        var cookies: any = {};
-        var cookieString = req.headers?.cookie ?? (cookiesFromSomewhere ?? []).join(';');
-        Log.Debug("Request Cookies", cookieString)
-        var crumbs = cookieString.split(';')
-        for (let c of crumbs) {
-            const pair: string[] = c.split('=');
-            if (pair.length === 2) cookies[pair[0]] = pair[1]
-            Log.Debug(`setting cookie ${pair[0]} = ${pair[1]}`)
-        }
         const parameters: any = eventIn.parameters ?? {}
-        const tslots = template.split('/').slice(1);
-        const pslots = path.split('/').slice(3);
-        // Log.Info("tslots", tslots);
-        // Log.Info("pslots", pslots);
-        for (let i = 0; i < tslots.length; i++) {
-            const brknm = (tslots[i] ?? "").trim();
-            if (brknm.charAt(0) === '{') {
-                Log.Debug("brknm", brknm)
-                const pn = brknm.substring(1, brknm.length - 1);
-                if(parameters[pn] === undefined) {
-                    parameters[pn] = (pslots[i] ?? "").trim();
-                    Log.Debug("values:", {pn, value: parameters[pn]})
+        if(req.stage) { // ignore for local request
+            var cookies: any = {};
+            var cookieString = req.headers?.cookie ?? (cookiesFromSomewhere ?? []).join(';');
+            Log.Trace("Request Cookies", cookieString)
+            var crumbs = cookieString.split(';')
+            for (let c of crumbs) {
+                const pair: string[] = c.split('=');
+                if (pair.length === 2) cookies[pair[0]] = pair[1]
+                Log.Debug(`setting cookie ${pair[0]} = ${pair[1]}`)
+            }
+            const tslots = template.split('/').slice(1);
+            const pslots = path.split('/').slice(3);
+            // Log.Info("tslots", tslots);
+            // Log.Info("pslots", pslots);
+            for (let i = 0; i < tslots.length; i++) {
+                const brknm = (tslots[i] ?? "").trim();
+                if (brknm.charAt(0) === '{') {
+                    Log.Debug("brknm", brknm)
+                    const pn = brknm.substring(1, brknm.length - 1);
+                    if (parameters[pn] === undefined) {
+                        parameters[pn] = (pslots[i] ?? "").trim();
+                        Log.Debug("values:", {pn, value: parameters[pn]})
+                    }
+                }
+            }
+            Log.Trace("queryStringParameters", eventIn.queryStringParameters);
+            if (eventIn.queryStringParameters && typeof eventIn.queryStringParameters === "object") {
+                for (let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
+                    parameters[p] = eventIn.queryStringParameters[p]
                 }
             }
         }
-        Log.Debug("queryStringParameters", eventIn.queryStringParameters);
-        if (eventIn.queryStringParameters && typeof eventIn.queryStringParameters === "object") {
-            for (let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
-                parameters[p] = eventIn.queryStringParameters[p]
-            }
-        }
-
         const eventOut: any = {
             request: {
                 originalUrl: path,
@@ -418,6 +414,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
     }
 }
 
+// format response in AWS style
 export function AwsStyleResponse(resp:any):any
 {
     // Log.Trace("In AwsStyleResponse with incoming resp", resp)
@@ -436,13 +433,16 @@ export function AwsStyleResponse(resp:any):any
         if (resp.cookies !== undefined) {
             const cookies: any = []
             let cookieCount = 0;
-            let age = resp.cookies.expireSeconds ?? 60; // 1 minute
             // delete resp.expireSeconds;
             Object.getOwnPropertyNames(resp.cookies).forEach(name => {
+                let age = resp.cookies.expireSeconds
                 var value = resp.cookies[name];
-                // cookies.push(`${name}=${value}; Max-Age=${age}; `);
-                AwsSetCookie(aws, `${name}=${value}; Max-Age=${age}; `, cookieCount++)
+                if(!value) age = -1;
+                let cval = age ? `${name}=${value}; Path=/; SameSite=Strict; HttpOnly`
+                               : `${name}=${value}; Path=/; Max-Age=${age} SameSite=Strict; HttpOnly`
+                AwsSetCookie(aws, cval, cookieCount++)
             })
+            // aws.headers['set-cookie'] = cookies
         }
         if (resp.headers !== undefined) {
 
@@ -490,7 +490,7 @@ export function AwsStyleResponse(resp:any):any
         aws.body = resp?.body ?? resp?.result ?? "";
 
         // console.log("AWS response ", aws);
-        Log.Debug("AWS Response", aws);
+        // Log.Debug("AWS Response", aws);
         return aws;
     }
 }

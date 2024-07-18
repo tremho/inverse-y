@@ -1,6 +1,6 @@
 {
   "name": "@tremho/inverse-y",
-  "version": "1.0.1-pre-release.259",
+  "version": "1.1.3",
   "description": "",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -18,7 +18,7 @@
     "services"
   ],
   "author": "tremho",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.2.5",
     "@types/tap": "^15.0.8",

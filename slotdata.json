@@ -1,0 +1,10 @@
+{
+  "appId":"alcaeus",
+  "siaToken":"eyJhbGciOiJIUzI1NiJ9.eyJjb20udHJlbWhvLmp3dC5zaWEiOnRydWUsInNsb3RJZCI6IjY0ZDkwYTA1LWFyeFVTVUVpRXJRWUtzWGJGb3VWMUQiLCJhdWQiOiJhbGNhZXVzIiwiaWF0IjoxNjkxOTQ1NDc3LCJuYmYiOjE2OTE5NDU0NzcsImV4cCI6MTY5MTk0OTA3NywiaXNzIjoiaHR0cHM6Ly90cmVtaG8uY29tIiwic3ViIjoiYWxjYWV1czpzc286NjRkOTBhMDUtYXJ4VVNVRWlFclFZS3NYYkZvdVYxRCIsImp0aSI6IjUwMzRlYmVkMjQ3NTU1YzJlNzEwZmEwNGUxZjgwODU0YmJhZWFkNzYifQ.K5WgMRy4Lv-0e-Y3yh6HvBbrTLbOfBy7DLmK55ljW78",
+  "redirect":"",
+  "sessionId":"b187fce1-4002-4a9d-b1b5-da4fa15c133d",
+  "createdMs":1691945477212,
+  "filledMs":0,
+  "providerData":{},
+  "userId":""
+}
