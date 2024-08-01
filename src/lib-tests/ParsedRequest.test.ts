@@ -6,6 +6,6 @@ function test(t:Tap.Tap) {
     t.end()
 
 }
-Tap.test('Parsed Request Test', (t:Tap.Tap)=> {
+Tap.test('Parsed Request Test', (t:any)=> {
     test(t)
 })

@@ -1,6 +1,6 @@
 import {RequestEvent} from "../request/EventTypes";
 import {ServerError, Success} from "./Responses";
-import {Log} from "../Logging/Logger"
+import {LambdaSupportLog, Log} from "../Logging/Logger"
 export {RequestEvent as RequestEvent}
 
 
@@ -164,7 +164,7 @@ export enum Method {
  *   "version": "1.0.0",
  *   "pathMap": "",
  *   "allowedMethods": "",
- *   "logLevel": "Debug",
+ *   "LambdaSupportLogLevel": "Debug",
  *   "sessionRequired": false,
  *   "userRequired": false,
  *   "schemas": {
@@ -182,14 +182,10 @@ export class ServiceDefinition {
     version? :string
     description?: string = ''
     pathMap: string = ''
-    allowedMethods?: string = 'POST'
-    logLevel?:string = 'None'   // will match to enum
+    method?: string = 'POST'
     parameters?: ParamDef[] = []
     returns?: ReturnDef = new ReturnDef()
     schemas?: object
-    sessionRequired?: boolean = true
-    userRequired?: boolean = false
-    onRequest?: (request: RequestEvent) => void
 }
 
 /** Declares the callback format for handling service API business */
@@ -201,6 +197,7 @@ export type Handler = (event?:any) => Promise<any>
 export class LambdaApi<TEvent> {
     definition:ServiceDefinition = new ServiceDefinition()
     handler?:Handler
+    funcName?:string
 
     /**
      * Construct by passing a definition
@@ -286,10 +283,18 @@ export class LambdaApi<TEvent> {
     async entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
 
         const isAws = (event as any).requestContext?.stage !== undefined
-        Log.Info(isAws ? "AWS Lamdba context detected" : "Local context detected");
-        Log.Info("Service Definition", this.definition);
+        // LambdaSupportLog.Info(isAws ? "AWS Lamdba context detected" : "Local context detected");
+        // LambdaSupportLog.Info("Service Definition", this.definition);
 
-        if(isAws) Log.Info("Service entry event", event);
+        // if(isAws) LambdaSupportLog.Info("Service entry event", event);
+
+        if(isAws) {
+            Log.enableColor('Console', false)
+            LambdaSupportLog.setMinimumLevel('Console', 'trace')
+            LambdaSupportLog.enableColor('Console', false)
+        }
+
+
         if(this.handler) {
             try {
                 let anyEvent:any = {};
@@ -299,7 +304,6 @@ export class LambdaApi<TEvent> {
                 }
                 let xevent:any = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
 
-                Log.Trace("looking for method", {anyEvent})
                 if(!isAws) {
                     // If a local request, get adornment values from there
                     xevent.parameters = anyEvent.local?.parameters ?? anyEvent.parameters ?? {}
@@ -308,17 +312,18 @@ export class LambdaApi<TEvent> {
                     xevent.body = anyEvent.local?.body ?? anyEvent.body ?? {}
                 }
 
-                Log.Trace("XEvent after adornment", xevent)
-                Log.Trace("Calling handler...")
+                LambdaSupportLog.Trace("XEvent after adornment", xevent)
+                LambdaSupportLog.Trace("Calling handler...")
+                const oldDefName = Log.setDefaultCategoryName(this.definition.name)
                 const rawReturn = await this.handler(xevent);
-                Log.Trace("RawReturn is", rawReturn);
+                Log.setDefaultCategoryName(oldDefName)
+                LambdaSupportLog.Trace("RawReturn is", rawReturn);
 
                 const resp = AwsStyleResponse(rawReturn);
-                Log.Trace("response out", resp);
-                console.log("");
+                LambdaSupportLog.Debug("response out", resp);
                 return resp;
             } catch(e:any) {
-                Log.Exception(e);
+                LambdaSupportLog.Exception(e);
                 return ServerError(e.message);
             }
 
@@ -333,7 +338,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         if (!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
         const req = eventIn.requestContext;
 
-        if(req.stage !== undefined) Log.Debug("Incoming request context", req)
+        if(req.stage !== undefined) LambdaSupportLog.Debug("Incoming request context", req)
         let cookiesFromSomewhere = eventIn.multiValueHeaders?.Cookie ?? [eventIn.headers?.Cookie];
         if(eventIn.cookies) {
             cookiesFromSomewhere = [];
@@ -346,7 +351,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         const domain = req.domainName ?? "";
 
         const pathLessStage = req.stage ? req.path.substring(req.stage.length + 1) : req.path;
-        if(req.stage) Log.Trace(`path values`, {path: req.path, stage: req.stage, pathLessStage})
+        if(req.stage) LambdaSupportLog.Trace(`path values`, {path: req.path, stage: req.stage, pathLessStage})
         let path = domain ? "https://" + domain + pathLessStage : req.path ?? eventIn.request?.originalUrl ?? "";
 
         let host = req.headers?.origin ?? domain
@@ -360,36 +365,33 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             // todo: http or https?npm
             host = "http://" + req.headers?.host;
         }
-        // console.log("host is "+host)
+        // console.LambdaSupportLog("host is "+host)
         // if(!domain) path = host + req.path;
 
         const parameters: any = eventIn.parameters ?? {}
         if(req.stage) { // ignore for local request
             var cookies: any = {};
             var cookieString = req.headers?.cookie ?? (cookiesFromSomewhere ?? []).join(';');
-            Log.Trace("Request Cookies", cookieString)
+            LambdaSupportLog.Trace("Request Cookies", cookieString)
             var crumbs = cookieString.split(';')
             for (let c of crumbs) {
                 const pair: string[] = c.split('=');
                 if (pair.length === 2) cookies[pair[0]] = pair[1]
-                Log.Debug(`setting cookie ${pair[0]} = ${pair[1]}`)
+                LambdaSupportLog.Debug(`setting cookie ${pair[0]} = ${pair[1]}`)
             }
             const tslots = template.split('/').slice(1);
             const pslots = path.split('/').slice(3);
-            // Log.Info("tslots", tslots);
-            // Log.Info("pslots", pslots);
             for (let i = 0; i < tslots.length; i++) {
                 const brknm = (tslots[i] ?? "").trim();
                 if (brknm.charAt(0) === '{') {
-                    Log.Debug("brknm", brknm)
                     const pn = brknm.substring(1, brknm.length - 1);
                     if (parameters[pn] === undefined) {
                         parameters[pn] = (pslots[i] ?? "").trim();
-                        Log.Debug("values:", {pn, value: parameters[pn]})
+                        // LambdaSupportLog.Debug("values:", {pn, value: parameters[pn]})
                     }
                 }
             }
-            Log.Trace("queryStringParameters", eventIn.queryStringParameters);
+            LambdaSupportLog.Trace("queryStringParameters", eventIn.queryStringParameters);
             if (eventIn.queryStringParameters && typeof eventIn.queryStringParameters === "object") {
                 for (let p of Object.getOwnPropertyNames(eventIn.queryStringParameters)) {
                     parameters[p] = eventIn.queryStringParameters[p]
@@ -409,7 +411,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         return eventOut;
     }
     catch(e:any) {
-        Log.Exception(e);
+        LambdaSupportLog.Exception(e);
         throw e;
     }
 }
@@ -417,37 +419,64 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 // format response in AWS style
 export function AwsStyleResponse(resp:any):any
 {
-    Log.Trace("In AwsStyleResponse with incoming resp", resp)
-    if(resp.isBase64Encoded !== undefined && resp.statusCode && resp.headers && resp.body) return resp; // it's already aws form
-
-    const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
-    if(typeof resp != "object") {
-        console.log(`resp is type ${ typeof resp }`)
-        Log.Trace(`Resp istype ${ typeof resp }`)
-        resp = {
-            statusCode: 200,
-            body: ""+resp,
-        }
-    }
+    LambdaSupportLog.Trace("In AwsStyleResponse with incoming resp", resp)
     if(resp) {
+        if(resp.isBase64Encoded !== undefined && resp.statusCode && resp.headers && resp.body) return resp; // it's already aws form
+
+        const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
+        if(typeof resp != "object") {
+            LambdaSupportLog.Trace(`Resp istype ${ typeof resp }`)
+            resp = {
+                statusCode: 200,
+                body: ""+resp,
+            }
+        }
+        resp.cookies ??= {}
+        if (resp.headers) {
+            if (resp.headers['Set-Cookie'] || resp.headers['set-cookie']) {
+                LambdaSupportLog.Debug('Migrating set-cookie directives for AWS compatibility')
+                LambdaSupportLog.Trace('headers to migrate?', resp.headers)
+                let sca = resp.headers['Set-Cookie'] ?? resp.headers['set-cookie'] ?? []
+                if (!Array.isArray(sca)) sca = [sca];
+                LambdaSupportLog.Trace("sca array", sca)
+                delete resp.headers ['Set-Cookie']
+                delete resp.headers['set-cookie']
+                for (let c of sca) {
+                    let n = c.indexOf('=')
+                    if (n !== -1) {
+                        const k = c.substring(0, n);
+                        let n2 = c.indexOf(';')
+                        if (n2 == -1) n2 = c.length;
+                        const v = c.substring(n + 1, n2)
+                        resp.cookies[k] = v
+                    }
+                }
+            }
+        }
         if (resp.cookies !== undefined) {
-            Log.Trace("AwsStyleResponse - Setting cookies")
+            LambdaSupportLog.Trace("AwsStyleResponse - Setting cookies", resp.cookies)
             let cookieCount = 0;
             // delete resp.expireSeconds;
             Object.getOwnPropertyNames(resp.cookies).forEach(name => {
+                // LambdaSupportLog.Trace('name ',{name})
                 let age = resp.cookies.expireSeconds
                 var value = resp.cookies[name];
-                if(!value) age = -1;
-                let cval = age ? `${name}=${value}; Path=/; SameSite=Strict; HttpOnly`
-                               : `${name}=${value}; Path=/; Max-Age=${age} SameSite=Strict; HttpOnly`
-                AwsSetCookie(aws, cval, cookieCount++)
+                // LambdaSupportLog.Trace('type ', typeof value)
+                if(typeof value !== 'function') {
+                    if (!value) age = 0;
+                    // LambdaSupportLog.Trace("cookie parts", {age, name, value})
+                    let cval = age === undefined ? `${name}=${value}; Path=/; SameSite=Strict; HttpOnly`
+                        : `${name}=${value}; Path=/; Max-Age=${age} SameSite=Strict; HttpOnly`
+                    // LambdaSupportLog.Trace('calling AwsSetCookie', {cval, cookieCount})
+                    AwsSetCookie(aws, cval, cookieCount++)
+                }
             })
         }
-        Log.Trace("AwsStyleResponse -- other headers")
+        // LambdaSupportLog.Trace("AwsStyleResponse -- other headers")
         if (resp.headers !== undefined) {
 
             for (var hdr of Object.getOwnPropertyNames(resp.headers)) {
-                Log.Trace("AwsStyleResponse -- header", {hdr, value: resp.headers[hdr]})
+                LambdaSupportLog.Trace("AwsStyleResponse -- header", {hdr, value: resp.headers[hdr]})
                 aws.headers[hdr] = resp.headers[hdr]
             }
             // delete resp.headers;
@@ -456,27 +485,30 @@ export function AwsStyleResponse(resp:any):any
             aws.statusCode = resp.statusCode;
             // delete resp.statusCode
         }
-        const body = resp.body ?? resp.result ?? resp;
-        if(!resp.contentType) {
-            try {
-                JSON.parse(body);
-                resp.contentType = "application/json"
-            }
-            catch(e:any) {
-                if(typeof body === "string") {
+        // content type resolution
+        let body = resp.body ?? resp.result ?? resp
+        LambdaSupportLog.Trace('ContentType resolution, body type =', typeof body)
+        LambdaSupportLog.Trace('pre-existing contentType', resp.contentType)
+        if(typeof body === 'object') {
+            resp.body = JSON.stringify(body)
+            resp.contentType = 'application/json'
+            LambdaSupportLog.Trace('Body stringified to ', body)
+        } else if(typeof body == 'string') {
+            if(!resp.contentType) // don't change if already set by caller
+                if(resp.isBinary || resp.isBase64Encoded) {
+                    resp.contentType = 'application/octet-stream'
+                } else {
                     if (body.indexOf("<html>") !== -1) {
                         resp.contentType = "text/html"
                     } else {
                         resp.contentType = "text/plain"
                     }
                 }
-            }
         }
 
 
-
         if (resp.contentType !== undefined && resp.statusCode != 301 && resp.statusCode != 302) {
-            Log.Debug("Content-type is being set to "+ resp.contentType)
+            LambdaSupportLog.Debug("Content-type is being set to "+ resp.contentType)
             aws.headers["content-type"] = resp.contentType
             // delete resp.contentType
         }
@@ -490,8 +522,8 @@ export function AwsStyleResponse(resp:any):any
         aws.isBase64Encoded = resp.isBinary || false;
         aws.body = resp?.body ?? resp?.result ?? "";
 
-        // console.log("AWS response ", aws);
-        Log.Debug("AWS Response", aws);
+        // console.LambdaSupportLog("AWS response ", aws);
+        LambdaSupportLog.Debug("AWS Response", aws);
         return aws;
     }
 }
@@ -501,6 +533,8 @@ export function AwsStyleResponse(resp:any):any
 // There are 512 combinations, which should be enough.
 function AwsSetCookie(aws:any, cookie:string, count:number)
 {
+    if(typeof cookie !== 'string') return;
+    // LambdaSupportLog.Trace("in", {cookie, count}, typeof cookie)
     let b = count.toString(2);
     if(b.length < 9) b = "0".repeat(9-b.length)+b
     const key = "set-cookie"
@@ -517,6 +551,6 @@ function AwsSetCookie(aws:any, cookie:string, count:number)
         keyOut += c;
         kp++;
     }
-    Log.Trace('AwsSetCookie:',{keyOut, cookie})
+    // LambdaSupportLog.Trace('AwsSetCookie:',{keyOut, cookie})
     aws.headers[keyOut] = cookie;
 }

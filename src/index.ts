@@ -22,13 +22,9 @@ import {
     NotImplemented
 } from "./service/Responses";
 
-import {LogLevel} from "./Logging/LogLevel";
 import {
     Log,
-    LogAtLevel,
-    ClearLogs,
-    setLoggingLevel,
-    collectLogs
+    LambdaSupportLog,
 } from "./Logging/Logger"
 
 // export all from LambdaApi
@@ -52,9 +48,5 @@ export {ServerException as ServerException}
 export {NotImplemented as NotImplemented}
 
 export {Log as Log}
-export {LogLevel as LogLevel}
-export {ClearLogs as ClearLogs}
-export {LogAtLevel as LogAtLevel}
-export {setLoggingLevel as setLoggingLevel}
-export {collectLogs as collectLogs}
+export {LambdaSupportLog as LambdaSupportLog}
 
