@@ -288,7 +288,7 @@ export class LambdaApi<TEvent> {
 
         // if(isAws) LambdaSupportLog.Info("Service entry event", event);
 
-        LambdaSupportLog.Trace("entry point 1")
+        // LambdaSupportLog.Trace("entry point 1")
 
         if(isAws) {
             Log.enableColor('Console', false)
@@ -296,11 +296,11 @@ export class LambdaApi<TEvent> {
             LambdaSupportLog.enableColor('Console', false)
         }
 
-        LambdaSupportLog.Trace("entry point 2")
+        // LambdaSupportLog.Trace("entry point 2")
 
         if(this.handler) {
             try {
-                LambdaSupportLog.Trace("entry point 3")
+                // LambdaSupportLog.Trace("entry point 3")
 
                 let anyEvent:any = {};
                 if(!isAws) {
@@ -317,7 +317,7 @@ export class LambdaApi<TEvent> {
                     xevent.body = anyEvent.local?.body ?? anyEvent.body ?? {}
                 }
 
-                LambdaSupportLog.Trace("entry point 4")
+                // LambdaSupportLog.Trace("entry point 4")
 
                 LambdaSupportLog.Trace("XEvent after adornment", xevent)
                 LambdaSupportLog.Trace("Calling handler...")
@@ -326,13 +326,13 @@ export class LambdaApi<TEvent> {
                 Log.setDefaultCategoryName(oldDefName)
                 LambdaSupportLog.Trace("RawReturn is", rawReturn);
 
-                LambdaSupportLog.Trace("entry point 5")
+                // LambdaSupportLog.Trace("entry point 5")
 
                 const resp = AwsStyleResponse(rawReturn);
                 LambdaSupportLog.Debug("response out", resp);
                 return resp;
             } catch(e:any) {
-                LambdaSupportLog.Trace("entry point 6")
+                // LambdaSupportLog.Trace("entry point 6")
                 LambdaSupportLog.Exception(e);
                 return ServerError(e.message);
             }
