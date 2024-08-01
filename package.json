@@ -1,6 +1,6 @@
 {
   "name": "@tremho/inverse-y",
-  "version": "2.0.0-pre-release.7",
+  "version": "2.0.0-pre-release.8",
   "description": "",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.529.0",
-    "@tremho/gen-logger": "^2.0.0-pre-release.4",
+    "@tremho/gen-logger": "^2.0.0-pre-release.8",
     "@types/sha1": "^1.1.3",
     "ansi-colors": "^4.1.3",
     "axios": "^1.6.3",
