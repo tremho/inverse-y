@@ -3,7 +3,6 @@ import {ServerError, Success} from "./Responses";
 import {LambdaSupportLog, Log} from "../Logging/Logger"
 export {RequestEvent as RequestEvent}
 
-
 /**
  * Defines the declaration of a parameter
  * including some optional constraints (min, max, oneOf, match) and an optional default value
@@ -385,10 +384,12 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             LambdaSupportLog.Trace("Request Cookies", cookieString)
             var crumbs = cookieString.split(';')
             for (let c of crumbs) {
+                c = c.trim();
                 const pair: string[] = c.split('=');
                 if (pair.length === 2) cookies[pair[0]] = pair[1]
                 LambdaSupportLog.Debug(`setting cookie ${pair[0]} = ${pair[1]}`)
             }
+            LambdaSupportLog.Trace('Resulting cookie set', {cookies})
             const tslots = template.split('/').slice(1);
             const pslots = path.split('/').slice(3);
             for (let i = 0; i < tslots.length; i++) {
