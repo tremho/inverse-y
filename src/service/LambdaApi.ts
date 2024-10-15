@@ -1,6 +1,7 @@
 import {RequestEvent} from "../request/EventTypes";
 import {ServerError, Success} from "./Responses";
 import {LambdaSupportLog, Log} from "../Logging/Logger"
+import {base64url} from "jose";
 export {RequestEvent as RequestEvent}
 
 /**
@@ -290,6 +291,7 @@ export class LambdaApi<TEvent> {
         // LambdaSupportLog.Trace("entry point 1")
 
         if(isAws) {
+            console.log("disabling color for aws logs")
             Log.enableColor('Console', false)
             LambdaSupportLog.setMinimumLevel('Console', 'trace')
             LambdaSupportLog.enableColor('Console', false)
@@ -322,13 +324,14 @@ export class LambdaApi<TEvent> {
                 LambdaSupportLog.Trace("Calling handler...")
                 const oldDefName = Log.setDefaultCategoryName(this.definition.name)
                 const rawReturn = await this.handler(xevent);
+                console.log("returning with results")
                 Log.setDefaultCategoryName(oldDefName)
-                LambdaSupportLog.Trace("RawReturn is", rawReturn);
+                // LambdaSupportLog.Trace("RawReturn is", rawReturn);
 
                 // LambdaSupportLog.Trace("entry point 5")
 
-                const resp = AwsStyleResponse(rawReturn);
-                LambdaSupportLog.Debug("response out", resp);
+                const resp = AwsStyleResponse(rawReturn, isAws);
+                // LambdaSupportLog.Debug("response out", resp);
                 return resp;
             } catch(e:any) {
                 // LambdaSupportLog.Trace("entry point 6")
@@ -343,6 +346,7 @@ export class LambdaApi<TEvent> {
 // More fixup mapping for request events
 function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 {
+    // console.warn('>>> adornEventFromLambdaRequest', {eventIn})
     try {
         if (!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
         const req = eventIn.requestContext;
@@ -359,8 +363,11 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 
         const domain = req.domainName ?? "";
 
-        const pathLessStage = req.stage ? req.path.substring(req.stage.length + 1) : req.path;
-        if(req.stage) LambdaSupportLog.Trace(`path values`, {path: req.path, stage: req.stage, pathLessStage})
+        const stage = (req.path?.indexOf(req.stage) !== -1 && req.stage) ? req.stage : ''
+        Log.trace('qualified stage', {stage})
+
+        const pathLessStage = stage ? req.path.substring(stage.length + 1) : req.path;
+        if(stage) LambdaSupportLog.Trace(`path values`, {path: req.path, stage, pathLessStage})
         let path = domain ? "https://" + domain + pathLessStage : req.path ?? eventIn.request?.originalUrl ?? "";
 
         let host = req.headers?.origin ?? domain
@@ -391,14 +398,18 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
             }
             LambdaSupportLog.Trace('Resulting cookie set', {cookies})
             const tslots = template.split('/').slice(1);
-            const pslots = path.split('/').slice(3);
+            let pslots = path.split('/').slice(3);
+            while(pslots[0] !== tslots[0]) { // align on first non-dynamic path in common (these may be different at first because of deployment path prefixing)
+              pslots = pslots.slice(1)
+            }
+            LambdaSupportLog.Trace("extracting path parameters", {tslots, pslots})
             for (let i = 0; i < tslots.length; i++) {
                 const brknm = (tslots[i] ?? "").trim();
                 if (brknm.charAt(0) === '{') {
                     const pn = brknm.substring(1, brknm.length - 1);
                     if (parameters[pn] === undefined) {
                         parameters[pn] = (pslots[i] ?? "").trim();
-                        // LambdaSupportLog.Debug("values:", {pn, value: parameters[pn]})
+                        LambdaSupportLog.Trace("values:", {pn, value: parameters[pn]})
                     }
                 }
             }
@@ -428,9 +439,9 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 }
 
 // format response in AWS style
-export function AwsStyleResponse(resp:any):any
+export function AwsStyleResponse(resp:any, isAws?:boolean):any
 {
-    LambdaSupportLog.Trace("In AwsStyleResponse with incoming resp", resp)
+    LambdaSupportLog.Trace("In AwsStyleResponse"); // with incoming resp", resp)
     if(resp) {
         if(resp.isBase64Encoded !== undefined && resp.statusCode && resp.headers && resp.body) return resp; // it's already aws form
 
@@ -501,10 +512,27 @@ export function AwsStyleResponse(resp:any):any
         LambdaSupportLog.Trace('ContentType resolution, body type =', typeof body)
         LambdaSupportLog.Trace('pre-existing contentType', resp.contentType)
         if(typeof body === 'object') {
-            resp.body = JSON.stringify(body)
-            resp.contentType = 'application/json'
-            LambdaSupportLog.Trace('Body stringified to ', body)
+            if(resp.isBinary) {
+                // if(isAws) {
+                //     if(body instanceof Buffer) {
+                //         resp.body = body.toString('base64')
+                //         resp.isBase64Encoded = true
+                //         LambdaSupportLog.Trace("body converted to base64")
+                //     }
+                // } else {
+                    resp.body = body;
+                    resp.isBinary = resp.isBase64Encoded = false
+                // }
+            } else {
+                resp.body = JSON.stringify(body)
+                resp.contentType = 'application/json'
+                LambdaSupportLog.Trace('Body stringified to ', body)
+            }
         } else if(typeof body == 'string') {
+            if(resp.isBinary && !resp.isBase64Encoded) {
+                Log.Debug("Body said to be binary, but not base64")
+                Log.Debug('>>> Body is unaltered from binary provided')
+            }
             if(!resp.contentType) // don't change if already set by caller
                 if(resp.isBinary || resp.isBase64Encoded) {
                     resp.contentType = 'application/octet-stream'
@@ -533,8 +561,8 @@ export function AwsStyleResponse(resp:any):any
         aws.isBase64Encoded = resp.isBinary || false;
         aws.body = resp?.body ?? resp?.result ?? "";
 
-        // console.LambdaSupportLog("AWS response ", aws);
-        LambdaSupportLog.Debug("AWS Response", aws);
+        LambdaSupportLog.Debug("AWS response ", aws)
+        LambdaSupportLog.Debug("AWS Response body length ", {length: aws.body?.length ?? 0});
         return aws;
     }
 }

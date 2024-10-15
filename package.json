@@ -1,6 +1,6 @@
 {
   "name": "@tremho/inverse-y",
-  "version": "2.0.2-pre-prelease.5",
+  "version": "2.0.21",
   "description": "",
   "main": "build/index.js",
   "types": "build/index.d.ts",
