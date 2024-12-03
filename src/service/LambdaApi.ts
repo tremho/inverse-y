@@ -288,10 +288,9 @@ export class LambdaApi<TEvent> {
 
         // if(isAws) LambdaSupportLog.Info("Service entry event", event);
 
-        // LambdaSupportLog.Trace("entry point 1")
+        LambdaSupportLog.Trace("entry point 1")
 
         if(isAws) {
-            console.log("disabling color for aws logs")
             Log.enableColor('Console', false)
             LambdaSupportLog.setMinimumLevel('Console', 'trace')
             LambdaSupportLog.enableColor('Console', false)
@@ -324,7 +323,6 @@ export class LambdaApi<TEvent> {
                 LambdaSupportLog.Trace("Calling handler...")
                 const oldDefName = Log.setDefaultCategoryName(this.definition.name)
                 const rawReturn = await this.handler(xevent);
-                console.log("returning with results")
                 Log.setDefaultCategoryName(oldDefName)
                 // LambdaSupportLog.Trace("RawReturn is", rawReturn);
 
@@ -346,13 +344,15 @@ export class LambdaApi<TEvent> {
 // More fixup mapping for request events
 function adornEventFromLambdaRequest(eventIn:any, template:string):Event
 {
-    // console.warn('>>> adornEventFromLambdaRequest', {eventIn})
+    LambdaSupportLog.Trace('>>> adornEventFromLambdaRequest', {eventIn})
+    let headers = eventIn?.request?.headers ?? eventIn?.headers ?? {}
+    LambdaSupportLog.Trace('>>> headers at adornment ', {headers})
     try {
         if (!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
         const req = eventIn.requestContext;
 
         if(req.stage !== undefined) LambdaSupportLog.Debug("Incoming request context", req)
-        let cookiesFromSomewhere = eventIn.multiValueHeaders?.Cookie ?? [eventIn.headers?.Cookie];
+        let cookiesFromSomewhere = eventIn.multiValueHeaders?.Cookie ?? [headers?.Cookie];
         if(eventIn.cookies) {
             cookiesFromSomewhere = [];
             for(let k of Object.getOwnPropertyNames(eventIn.cookies)) {
@@ -370,16 +370,16 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         if(stage) LambdaSupportLog.Trace(`path values`, {path: req.path, stage, pathLessStage})
         let path = domain ? "https://" + domain + pathLessStage : req.path ?? eventIn.request?.originalUrl ?? "";
 
-        let host = req.headers?.origin ?? domain
+        let host = headers?.origin ?? domain
         if (!host) {
-            host = req.headers?.referer ?? "";
+            host = headers?.referer ?? "";
             let ptci = path.indexOf("://") + 3;
             let ei = path.indexOf("/", ptci);
             host = ptci > 3 ? path.substring(0, ei) : "";
         }
         if (!host) {
             // todo: http or https?npm
-            host = "http://" + req.headers?.host;
+            host = "http://" + headers?.host;
         }
         // console.LambdaSupportLog("host is "+host)
         // if(!domain) path = host + req.path;
@@ -387,20 +387,24 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         const parameters: any = eventIn.parameters ?? {}
         if(req.stage) { // ignore for local request
             var cookies: any = {};
-            var cookieString = req.headers?.cookie ?? (cookiesFromSomewhere ?? []).join(';');
+            var cookieString = headers?.cookie ?? (cookiesFromSomewhere ?? []).join(';');
             LambdaSupportLog.Trace("Request Cookies", cookieString)
             var crumbs = cookieString.split(';')
             for (let c of crumbs) {
                 c = c.trim();
+                if(!c) continue;
                 const pair: string[] = c.split('=');
-                if (pair.length === 2) cookies[pair[0]] = pair[1]
-                LambdaSupportLog.Debug(`setting cookie ${pair[0]} = ${pair[1]}`)
+                if (pair.length === 2) cookies[pair[0].trim()] = pair[1]
+                LambdaSupportLog.Debug(`setting cookie '${pair[0]}' = '${pair[1]}'`)
             }
             LambdaSupportLog.Trace('Resulting cookie set', {cookies})
             const tslots = template.split('/').slice(1);
             let pslots = path.split('/').slice(3);
-            while(pslots[0] !== tslots[0]) { // align on first non-dynamic path in common (these may be different at first because of deployment path prefixing)
-              pslots = pslots.slice(1)
+            LambdaSupportLog.Trace('pslots and tslots', {pslots, tslots})
+            if(tslots[0] !== 'webroot' && tslots[0] !== 'fileserve') {
+                while (pslots.length > 0 && pslots[0] !== tslots[0]) { // align on first non-dynamic path in common (these may be different at first because of deployment path prefixing)
+                    pslots = pslots.slice(1)
+                }
             }
             LambdaSupportLog.Trace("extracting path parameters", {tslots, pslots})
             for (let i = 0; i < tslots.length; i++) {
@@ -423,7 +427,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         const eventOut: any = {
             request: {
                 originalUrl: path,
-                headers: req.headers
+                headers
             },
             stage: req.stage,
             cookies,
@@ -447,7 +451,7 @@ export function AwsStyleResponse(resp:any, isAws?:boolean):any
 
         const aws:any = { statusCode: 500, body: "Error: No response mapped!", headers:{"content-type": "text/plain"} }
         if(typeof resp != "object") {
-            LambdaSupportLog.Trace(`Resp istype ${ typeof resp }`)
+            LambdaSupportLog.Trace('Resp is type '+typeof resp )
             resp = {
                 statusCode: 200,
                 body: ""+resp,
