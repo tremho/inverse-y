@@ -27,6 +27,16 @@ import {
     LambdaSupportLog,
 } from "./Logging/Logger"
 
+import {
+    ServiceSettingsData,
+    initServiceSettings,
+    importSettings,
+    setWebroot,
+    setAws,
+    getServiceSettings,
+    getAssetUrl
+} from "./service/ServiceSettings"
+
 // export all from LambdaApi
 export {LambdaApi as LambdaApi}
 export {Handler as Handler}
@@ -49,4 +59,12 @@ export {NotImplemented as NotImplemented}
 
 export {Log as Log}
 export {LambdaSupportLog as LambdaSupportLog}
+
+export {ServiceSettingsData as ServiceSettingsData}
+export {initServiceSettings as initServiceSettings}
+export {importSettings as importSettings}
+export {setWebroot as setWebroot}
+export {setAws as setAws}
+export {getServiceSettings as getServiceSettings}
+export {getAssetUrl as getAssetUrl}
 

@@ -2,8 +2,10 @@ import {RequestEvent} from "../request/EventTypes";
 import {ServerError, Success} from "./Responses";
 import {LambdaSupportLog, Log} from "../Logging/Logger"
 import {base64url} from "jose";
+import {importSettings, setAws} from "./ServiceSettings";
 export {RequestEvent as RequestEvent}
 
+let areWeRunningUnderAws = false;
 /**
  * Defines the declaration of a parameter
  * including some optional constraints (min, max, oneOf, match) and an optional default value
@@ -282,13 +284,19 @@ export class LambdaApi<TEvent> {
      */
     async entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
 
-        const isAws = (event as any).requestContext?.stage !== undefined
+        const stage = (event as any).requestContext?.stage
+        const isAws = stage !== undefined && stage !== "undefined"
+        LambdaSupportLog.Trace("AWS stage", {isAws, stage})
+        areWeRunningUnderAws = isAws
+
+        importSettings(LambdaSupportLog)
+
         // LambdaSupportLog.Info(isAws ? "AWS Lamdba context detected" : "Local context detected");
         // LambdaSupportLog.Info("Service Definition", this.definition);
 
         // if(isAws) LambdaSupportLog.Info("Service entry event", event);
 
-        LambdaSupportLog.Trace("entry point 1")
+        // LambdaSupportLog.Trace("entry point 1")
 
         if(isAws) {
             Log.enableColor('Console', false)
@@ -309,27 +317,30 @@ export class LambdaApi<TEvent> {
                 }
                 let xevent:any = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
 
+                // LambdaSupportLog.Trace("entry point 3B")
+
                 if(!isAws) {
+                    // LambdaSupportLog.Trace("entry point 3C")
                     // If a local request, get adornment values from there
                     xevent.parameters = anyEvent.local?.parameters ?? anyEvent.parameters ?? {}
                     xevent.cookies = anyEvent.local?.cookies ?? anyEvent.cookies ?? {}
                     xevent.headers = anyEvent.local?.headers ?? anyEvent.headers ?? {}
                     xevent.body = anyEvent.local?.body ?? anyEvent.body ?? {}
+                    // LambdaSupportLog.Trace("entry point 3D")
                 }
 
                 // LambdaSupportLog.Trace("entry point 4")
-
                 LambdaSupportLog.Trace("XEvent after adornment", xevent)
                 LambdaSupportLog.Trace("Calling handler...")
                 const oldDefName = Log.setDefaultCategoryName(this.definition.name)
                 const rawReturn = await this.handler(xevent);
                 Log.setDefaultCategoryName(oldDefName)
-                // LambdaSupportLog.Trace("RawReturn is", rawReturn);
+                LambdaSupportLog.Trace("RawReturn is", rawReturn);
 
                 // LambdaSupportLog.Trace("entry point 5")
 
                 const resp = AwsStyleResponse(rawReturn, isAws);
-                // LambdaSupportLog.Debug("response out", resp);
+                LambdaSupportLog.Debug("response out", resp);
                 return resp;
             } catch(e:any) {
                 // LambdaSupportLog.Trace("entry point 6")
@@ -369,6 +380,8 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         const pathLessStage = stage ? req.path.substring(stage.length + 1) : req.path;
         if(stage) LambdaSupportLog.Trace(`path values`, {path: req.path, stage, pathLessStage})
         let path = domain ? "https://" + domain + pathLessStage : req.path ?? eventIn.request?.originalUrl ?? "";
+
+        setAws(stage, "https://" + domain + '/' + stage)
 
         let host = headers?.origin ?? domain
         if (!host) {
@@ -565,8 +578,10 @@ export function AwsStyleResponse(resp:any, isAws?:boolean):any
         aws.isBase64Encoded = resp.isBinary || false;
         aws.body = resp?.body ?? resp?.result ?? "";
 
-        LambdaSupportLog.Debug("AWS response ", aws)
         LambdaSupportLog.Debug("AWS Response body length ", {length: aws.body?.length ?? 0});
+        if(aws.body?.length < 2500) {
+            LambdaSupportLog.Debug("AWS response ", aws)
+        }
         return aws;
     }
 }
@@ -596,4 +611,8 @@ function AwsSetCookie(aws:any, cookie:string, count:number)
     }
     // LambdaSupportLog.Trace('AwsSetCookie:',{keyOut, cookie})
     aws.headers[keyOut] = cookie;
+}
+
+export function checkIsAws() {
+    return areWeRunningUnderAws
 }
