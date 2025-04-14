@@ -284,6 +284,8 @@ export class LambdaApi<TEvent> {
      */
     async entryPoint(event: TEvent|RequestEvent, context:any, callback:any) {
 
+        // LambdaSupportLog.Trace("Welcome to the debugging trace at Line 287")
+
         const stage = (event as any).requestContext?.stage
         const isAws = stage !== undefined && stage !== "undefined"
         LambdaSupportLog.Trace("AWS stage", {isAws, stage})
@@ -307,17 +309,19 @@ export class LambdaApi<TEvent> {
         // LambdaSupportLog.Trace("entry point 2")
 
         if(this.handler) {
+            // LambdaSupportLog.Trace("Line 312")
+
             try {
-                // LambdaSupportLog.Trace("entry point 3")
+                // LambdaSupportLog.Trace("entry point 3 - before adornment")
 
                 let anyEvent:any = {};
                 if(!isAws) {
                     anyEvent = event as any;
                     anyEvent.requestContext = {};
                 }
-                let xevent:any = adornEventFromLambdaRequest(event, this.definition.pathMap ?? "")
+                let xevent:any = adornEventFromLambdaRequest(event, this.definition)
 
-                // LambdaSupportLog.Trace("entry point 3B")
+                // LambdaSupportLog.Trace("entry point 3B - past adornment")
 
                 if(!isAws) {
                     // LambdaSupportLog.Trace("entry point 3C")
@@ -327,20 +331,23 @@ export class LambdaApi<TEvent> {
                     xevent.headers = anyEvent.local?.headers ?? anyEvent.headers ?? {}
                     xevent.body = anyEvent.local?.body ?? anyEvent.body ?? {}
                     // LambdaSupportLog.Trace("entry point 3D")
+                    // LambdaSupportLog.Trace("possible alternate body adjust point")
+
                 }
+                // LambdaSupportLog.Trace("Line 335")
 
                 // LambdaSupportLog.Trace("entry point 4")
-                LambdaSupportLog.Trace("XEvent after adornment", xevent)
+                // LambdaSupportLog.Trace("XEvent after adornment", xevent)
                 LambdaSupportLog.Trace("Calling handler...")
                 const oldDefName = Log.setDefaultCategoryName(this.definition.name)
                 const rawReturn = await this.handler(xevent);
                 Log.setDefaultCategoryName(oldDefName)
-                LambdaSupportLog.Trace("RawReturn is", rawReturn);
+                // LambdaSupportLog.Trace("RawReturn is", rawReturn);
 
                 // LambdaSupportLog.Trace("entry point 5")
 
                 const resp = AwsStyleResponse(rawReturn, isAws);
-                LambdaSupportLog.Debug("response out", resp);
+                // LambdaSupportLog.Debug("response out", resp);
                 return resp;
             } catch(e:any) {
                 // LambdaSupportLog.Trace("entry point 6")
@@ -352,17 +359,24 @@ export class LambdaApi<TEvent> {
     }
 }
 
+let method
+
 // More fixup mapping for request events
-function adornEventFromLambdaRequest(eventIn:any, template:string):Event
+function adornEventFromLambdaRequest(eventIn:any, def:any):Event
 {
-    LambdaSupportLog.Trace('>>> adornEventFromLambdaRequest', {eventIn})
+    const template = def?.pathMap ?? ''
+    const bodyType = def?.bodyType ?? 'text'
+
+    // LambdaSupportLog.Trace('>>> adornEventFromLambdaRequest', {eventIn})
     let headers = eventIn?.request?.headers ?? eventIn?.headers ?? {}
-    LambdaSupportLog.Trace('>>> headers at adornment ', {headers})
+    // LambdaSupportLog.Trace('>>> headers at adornment ', {headers})
+    // LambdaSupportLog.Trace("Line 363")
     try {
         if (!eventIn.requestContext) throw new Error("No request context in Event from Lambda!");
         const req = eventIn.requestContext;
 
         if(req.stage !== undefined) LambdaSupportLog.Debug("Incoming request context", req)
+        method = req.httpMethod
         let cookiesFromSomewhere = eventIn.multiValueHeaders?.Cookie ?? [headers?.Cookie];
         if(eventIn.cookies) {
             cookiesFromSomewhere = [];
@@ -371,6 +385,7 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
                 cookiesFromSomewhere.push(`${k}=${v}`)
             }
         }
+        // LambdaSupportLog.Trace("Line 378")
 
         const domain = req.domainName ?? "";
 
@@ -396,6 +411,8 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
         }
         // console.LambdaSupportLog("host is "+host)
         // if(!domain) path = host + req.path;
+
+        // LambdaSupportLog.Trace("Line 403")
 
         const parameters: any = eventIn.parameters ?? {}
         if(req.stage) { // ignore for local request
@@ -425,8 +442,10 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
                 if (brknm.charAt(0) === '{') {
                     const pn = brknm.substring(1, brknm.length - 1);
                     if (parameters[pn] === undefined) {
-                        parameters[pn] = (pslots[i] ?? "").trim();
-                        LambdaSupportLog.Trace("values:", {pn, value: parameters[pn]})
+                        let pv:string|undefined =  (pslots[i] ?? "").trim();
+                        if(pv === 'undefined' || pv === '~') pv = undefined
+                        parameters[pn] = pv
+                        // LambdaSupportLog.Trace("values:", {pn, value: parameters[pn]})
                     }
                 }
             }
@@ -437,19 +456,117 @@ function adornEventFromLambdaRequest(eventIn:any, template:string):Event
                 }
             }
         }
+        // LambdaSupportLog.Trace("Line 447")
+
+        //=====
+        // let's see if we can form our bodies to match expectations
+        //++++++
+        let body: any = eventIn.body ?? ''
+        if(checkIsAws()) {
+            let type = bodyType
+            const options: any = {
+                "text": "text",
+                "json": "json",
+                "application/json": "json",
+            }
+            if (type) {
+                type = type.toLowerCase().trim()
+                if (type.substring(0, 5) === 'text/') type = "text"
+                else type = options[type]
+            }
+            // LambdaSupportLog.Info("Checking LambdaAPI body2Buffer")
+            // if it's a binary body, we want to make it a buffer
+            // keep any text bodies as they are
+            // LambdaSupportLog.Info("eventIn.body type incoming = ", typeof body)
+            // LambdaSupportLog.Info("The type we want per bodyType = ", type)
+            if (type === 'text') {
+                // LambdaSupportLog.Info("We want text")
+                if(typeof req.body === 'object') {
+                    // LambdaSupportLog.Info("We have object")
+                    if(Buffer.isBuffer(body)) {
+                        // LambdaSupportLog.Info("We are converting a buffer to string")
+                        body = body.toString()
+                    } else {
+                        // LambdaSupportLog.Info("We are assuming the object is json", body)
+                        // LambdaSupportLog.Info("We can test it for properties. this has ", Object.getOwnPropertyNames(body).length)
+                        body = JSON.stringify(body)
+                    }
+                }
+            }
+            else if (type === 'json') {
+                // LambdaSupportLog.Info('We want JSON')
+                if(typeof body === 'object') {
+                    // LambdaSupportLog.Info("We have object")
+                    if(Buffer.isBuffer(body)) {
+                        // LambdaSupportLog.Info("and it's a buffer, so we turn it to a string here")
+                        body = body.toString()
+                    }
+                }
+                if (typeof body === 'string') {
+                    // LambdaSupportLog.Info("We have a string")
+                    try {
+                        // LambdaSupportLog.Info("So we parse it as JSON")
+                        body = JSON.parse(body)
+                    } catch (e: any) {
+                        // LambdaSupportLog.Error('Failed request body JSON parse')
+                    }
+                }
+            } else {
+                // binary expects a buffer
+                // LambdaSupportLog.Info("We want a buffer")
+                if (Buffer.isBuffer(body)) {
+                    // LambdaSupportLog.Info("we are one already")
+                } else {
+                    // LambdaSupportLog.Info("and we aren't one")
+                    if (typeof body === 'object') {
+                        // LambdaSupportLog.Info("but we are an object, so stringify it first")
+                        body = JSON.stringify(body) // make a string first before we bufferize the json
+                    }
+                    // LambdaSupportLog.Info("Bufferizing the body")
+                    let summary = "Binary Body Summary:\n"
+                    summary += "- body is type "+ typeof body+ '\n'
+                    // if(typeof body === 'string') summary += '- length = '+body.length + "\n"
+                    // summary += '- checking if AWS used base64 encoding: '+eventIn.isBase64Encoded +'\n'
+                    // LambdaSupportLog.Info("turning binary string to buffer")
+                    const encoding = eventIn.isBase64Encoded ? 'base64' : 'binary'
+                    summary += '- encoding '+ encoding + '\n'
+                    const buffer = Buffer.from(body, encoding)
+                    summary += '- buffer bytelength is '+buffer.byteLength + '\n'
+                    summary += 'First 16 bytes: ' + buffer.subarray(0, 16).toString('hex') + '\n'
+                    // let off =
+                    summary += 'Last 16 bytes: ' + buffer.subarray(buffer.byteLength - 16).toString('hex') + '\n'
+
+                    body = buffer
+                    LambdaSupportLog.Info(summary)
+                }
+            }
+            // LambdaSupportLog.Trace("past if/else (type) ", type)
+            //------
+        }
+        // LambdaSupportLog.Trace("at top of eventOut start, body type is now " + typeof body)
+        let isProxyPath;
+        if(parameters["proxy+"]) {
+            delete parameters["proxy+"]
+            isProxyPath = true
+        }
         const eventOut: any = {
             request: {
                 originalUrl: path,
                 headers
             },
+            method,
+            isProxyPath,
+            pathParts: pathLessStage?.substring(1).split('/') ?? [],
             stage: req.stage,
             cookies,
             parameters,
-            body: eventIn.body
+            body
         }
+        LambdaSupportLog.Info("eventOut complete")
         return eventOut;
     }
     catch(e:any) {
+        // LambdaSupportLog.Trace("catch at line 526")
         LambdaSupportLog.Exception(e);
         throw e;
     }
@@ -520,6 +637,12 @@ export function AwsStyleResponse(resp:any, isAws?:boolean):any
             }
             // delete resp.headers;
         }
+        LambdaSupportLog.Trace("AwsStyleResponse -- adding CORS headers")
+        aws.headers['Access-Control-Allow-Origin'] = '*'
+        aws.headers['Access-Control-Allow-Headers'] = '*'
+        aws.headers['Access-Control-Allow-Credentials'] = 'true'
+        aws.headers['Access-Control-Allow-Methods'] = '*'
+
         if (resp.statusCode !== undefined) {
             aws.statusCode = resp.statusCode;
             // delete resp.statusCode
@@ -543,7 +666,7 @@ export function AwsStyleResponse(resp:any, isAws?:boolean):any
             } else {
                 resp.body = JSON.stringify(body)
                 resp.contentType = 'application/json'
-                LambdaSupportLog.Trace('Body stringified to ', body)
+                // LambdaSupportLog.Trace('Body stringified to ', body)
             }
         } else if(typeof body == 'string') {
             if(resp.isBinary && !resp.isBase64Encoded) {
