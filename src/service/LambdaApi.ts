@@ -474,60 +474,60 @@ function adornEventFromLambdaRequest(eventIn:any, def:any):Event
                 if (type.substring(0, 5) === 'text/') type = "text"
                 else type = options[type]
             }
-            // LambdaSupportLog.Info("Checking LambdaAPI body2Buffer")
+            LambdaSupportLog.Info("Checking LambdaAPI body2Buffer")
             // if it's a binary body, we want to make it a buffer
             // keep any text bodies as they are
-            // LambdaSupportLog.Info("eventIn.body type incoming = ", typeof body)
-            // LambdaSupportLog.Info("The type we want per bodyType = ", type)
+            LambdaSupportLog.Info("eventIn.body type incoming = ", typeof body)
+            LambdaSupportLog.Info("The type we want per bodyType = ", type)
             if (type === 'text') {
                 // LambdaSupportLog.Info("We want text")
                 if(typeof req.body === 'object') {
-                    // LambdaSupportLog.Info("We have object")
+                    LambdaSupportLog.Info("We have object")
                     if(Buffer.isBuffer(body)) {
-                        // LambdaSupportLog.Info("We are converting a buffer to string")
+                        LambdaSupportLog.Info("We are converting a buffer to string")
                         body = body.toString()
                     } else {
-                        // LambdaSupportLog.Info("We are assuming the object is json", body)
-                        // LambdaSupportLog.Info("We can test it for properties. this has ", Object.getOwnPropertyNames(body).length)
+                        LambdaSupportLog.Info("We are assuming the object is json", body)
+                        LambdaSupportLog.Info("We can test it for properties. this has ", Object.getOwnPropertyNames(body).length)
                         body = JSON.stringify(body)
                     }
                 }
             }
             else if (type === 'json') {
-                // LambdaSupportLog.Info('We want JSON')
+                LambdaSupportLog.Info('We want JSON')
                 if(typeof body === 'object') {
-                    // LambdaSupportLog.Info("We have object")
+                    LambdaSupportLog.Info("We have object")
                     if(Buffer.isBuffer(body)) {
-                        // LambdaSupportLog.Info("and it's a buffer, so we turn it to a string here")
+                        LambdaSupportLog.Info("and it's a buffer, so we turn it to a string here")
                         body = body.toString()
                     }
                 }
                 if (typeof body === 'string') {
-                    // LambdaSupportLog.Info("We have a string")
+                    LambdaSupportLog.Info("We have a string")
                     try {
-                        // LambdaSupportLog.Info("So we parse it as JSON")
+                        LambdaSupportLog.Info("So we parse it as JSON")
                         body = JSON.parse(body)
                     } catch (e: any) {
-                        // LambdaSupportLog.Error('Failed request body JSON parse')
+                        LambdaSupportLog.Error('Failed request body JSON parse')
                     }
                 }
             } else {
                 // binary expects a buffer
-                // LambdaSupportLog.Info("We want a buffer")
+                LambdaSupportLog.Info("We want a buffer")
                 if (Buffer.isBuffer(body)) {
-                    // LambdaSupportLog.Info("we are one already")
+                    LambdaSupportLog.Info("we are one already")
                 } else {
-                    // LambdaSupportLog.Info("and we aren't one")
+                    LambdaSupportLog.Info("and we aren't one")
                     if (typeof body === 'object') {
-                        // LambdaSupportLog.Info("but we are an object, so stringify it first")
+                        LambdaSupportLog.Info("but we are an object, so stringify it first")
                         body = JSON.stringify(body) // make a string first before we bufferize the json
                     }
-                    // LambdaSupportLog.Info("Bufferizing the body")
+                    LambdaSupportLog.Info("Bufferizing the body")
                     let summary = "Binary Body Summary:\n"
                     summary += "- body is type "+ typeof body+ '\n'
-                    // if(typeof body === 'string') summary += '- length = '+body.length + "\n"
-                    // summary += '- checking if AWS used base64 encoding: '+eventIn.isBase64Encoded +'\n'
-                    // LambdaSupportLog.Info("turning binary string to buffer")
+                    if(typeof body === 'string') summary += '- length = '+body.length + "\n"
+                    summary += '- checking if AWS used base64 encoding: '+eventIn.isBase64Encoded +'\n'
+                    LambdaSupportLog.Info("turning binary string to buffer")
                     const encoding = eventIn.isBase64Encoded ? 'base64' : 'binary'
                     summary += '- encoding '+ encoding + '\n'
                     const buffer = Buffer.from(body, encoding)
@@ -540,10 +540,10 @@ function adornEventFromLambdaRequest(eventIn:any, def:any):Event
                     LambdaSupportLog.Info(summary)
                 }
             }
-            // LambdaSupportLog.Trace("past if/else (type) ", type)
+            LambdaSupportLog.Trace("past if/else (type) ", type)
             //------
         }
-        // LambdaSupportLog.Trace("at top of eventOut start, body type is now " + typeof body)
+        LambdaSupportLog.Trace("at top of eventOut start, body type is now " + typeof body)
         let isProxyPath;
         if(parameters["proxy+"]) {
             delete parameters["proxy+"]
